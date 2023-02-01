@@ -129,12 +129,12 @@ func Test_CalculateRewards(t *testing.T) {
 
 	// Calculate rewards
 	tickets, err := bu.CalculateRewards(&Ticket{
-		Rule:        "default",
-		MemberId:    levels[2].Id,
-		Amount:      1000,
-		Commissions: 50,
-		Total:       1050,
-		CreatedAt:   time.Now(),
+		Rule:      "default",
+		MemberId:  levels[2].Id,
+		Amount:    1000,
+		Fee:       50,
+		Total:     1050,
+		CreatedAt: time.Now(),
 	})
 	assert.Nil(t, err)
 
@@ -220,13 +220,13 @@ func Test_CreateTicket(t *testing.T) {
 
 	// Calculate rewards
 	err = bu.CreateTicket(&Ticket{
-		LedgerId:    "Slot A",
-		Rule:        "default",
-		MemberId:    levels[2].Id,
-		Amount:      1000,
-		Commissions: 50,
-		Total:       1050,
-		CreatedAt:   time.Now(),
+		LedgerId:  "Slot A",
+		Rule:      "default",
+		MemberId:  levels[2].Id,
+		Amount:    1000,
+		Fee:       50,
+		Total:     1050,
+		CreatedAt: time.Now(),
 	})
 	assert.Nil(t, err)
 

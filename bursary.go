@@ -106,7 +106,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 
 	// Initial
 	amount := t.Amount
-	cormissions := t.Commissions
+	fee := t.Fee
 
 	m, err := b.rm.GetMember(t.MemberId)
 	if err != nil {
@@ -120,7 +120,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 	le := &LedgerEntry{
 		MemberId:    t.MemberId,
 		Amount:      amount,
-		Commissions: int(math.Floor(float64(cormissions) * r.Commission)),
+		Commissions: int(math.Floor(float64(fee) * r.Commission)),
 		Desc:        t.Desc,
 		Info:        t.Info,
 		IsDirect:    true,
@@ -132,7 +132,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 	entries := make([]*LedgerEntry, 0)
 	entries = append(entries, le)
 
-	cormissions -= le.Commissions
+	fee -= le.Commissions
 
 	// Calculating sharing and cormissions by levels
 	levels, err := b.GetLevels(t.MemberId)
@@ -169,16 +169,16 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 				le.Amount = int(math.Ceil(float64(t.Amount) * prevRule.Share))
 			}
 
-			le.Commissions = int(math.Floor(float64(t.Commissions) * cormissionShare))
+			le.Commissions = int(math.Floor(float64(t.Fee) * cormissionShare))
 			le.Total = le.Amount + le.Commissions
 
 			amount -= le.Amount
-			cormissions -= le.Commissions
+			fee -= le.Commissions
 
 		} else {
 			// The top-level agent takes the rest of income and cormissions
 			le.Amount = amount
-			le.Commissions = cormissions
+			le.Commissions = fee
 			le.Total = le.Amount + le.Commissions
 		}
 
