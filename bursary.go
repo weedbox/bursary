@@ -31,7 +31,8 @@ func NewBursary(opts ...Opt) Bursary {
 	}
 
 	if b.rm == nil {
-		b.rm = NewRelationManager()
+		// Using memory to store relationship by default
+		b.rm = NewRelationManagerMemory()
 	}
 
 	if b.lm == nil {
@@ -39,7 +40,8 @@ func NewBursary(opts ...Opt) Bursary {
 	}
 
 	if b.gl == nil {
-		b.gl = NewLedger()
+		// Using memory to store ledger by default
+		b.gl = NewLedgerMemory()
 	}
 
 	return b

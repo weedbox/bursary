@@ -171,7 +171,7 @@ func Test_CreateTicket(t *testing.T) {
 	defer bu.Close()
 
 	// Create ledger named Slot A for testing
-	err := bu.LedgerManager().Add("Slot A", NewLedger())
+	err := bu.LedgerManager().Add("Slot A", NewLedgerMemory())
 	assert.Nil(t, err)
 
 	levels := []*MemberEntry{
