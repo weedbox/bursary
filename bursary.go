@@ -134,7 +134,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 
 	fee -= le.Commissions
 
-	// Calculating sharing and cormissions by levels
+	// Calculating sharing and commissions by levels
 	levels, err := b.GetLevels(t.MemberId)
 	if err != nil {
 		return nil, err
@@ -176,7 +176,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 			fee -= le.Commissions
 
 		} else {
-			// The top-level agent takes the rest of income and cormissions
+			// The top-level agent takes the rest of amount and cormissions
 			le.Amount = amount
 			le.Commissions = fee
 			le.Total = le.Amount + le.Commissions
