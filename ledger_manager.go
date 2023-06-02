@@ -7,9 +7,9 @@ var (
 )
 
 type LedgerManager interface {
-	Add(ledgerId string, l Ledger) error
-	Get(ledgerId string) (Ledger, error)
-	Delete(ledgerId string) error
+	Add(name string, l Ledger) error
+	Get(name string) (Ledger, error)
+	Delete(name string) error
 }
 
 type ledgerManager struct {
@@ -22,21 +22,21 @@ func NewLedgerManager() LedgerManager {
 	}
 }
 
-func (lm *ledgerManager) Add(ledgerId string, l Ledger) error {
-	lm.ledgers[ledgerId] = l
+func (lm *ledgerManager) Add(name string, l Ledger) error {
+	lm.ledgers[name] = l
 	return nil
 }
 
-func (lm *ledgerManager) Get(ledgerId string) (Ledger, error) {
+func (lm *ledgerManager) Get(name string) (Ledger, error) {
 
-	if l, ok := lm.ledgers[ledgerId]; ok {
+	if l, ok := lm.ledgers[name]; ok {
 		return l, nil
 	}
 
 	return nil, ErrLedgerNotFound
 }
 
-func (lm *ledgerManager) Delete(ledgerId string) error {
-	delete(lm.ledgers, ledgerId)
+func (lm *ledgerManager) Delete(name string) error {
+	delete(lm.ledgers, name)
 	return nil
 }

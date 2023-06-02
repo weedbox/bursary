@@ -42,6 +42,7 @@ func NewBursary(opts ...Opt) Bursary {
 	if b.gl == nil {
 		// Using memory to store ledger by default
 		b.gl = NewLedgerMemory()
+		b.lm.Add("general", b.gl)
 	}
 
 	return b
@@ -199,7 +200,7 @@ func (b *bursary) CreateTicket(t *Ticket) error {
 		return err
 	}
 
-	// Write entries to general ledger
+	// Write reward results to general ledger
 	err = b.gl.WriteRecords(entries)
 	if err != nil {
 		return err
