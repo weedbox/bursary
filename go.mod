@@ -1,4 +1,4 @@
-module github.com/cfsghost/bursary
+module github.com/weedbox/bursary
 
 go 1.19
 
