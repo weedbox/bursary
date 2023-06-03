@@ -375,6 +375,6 @@ func Test_WriteEntries(t *testing.T) {
 		assert.Equal(t, a["income"]+a["commission"], records[0].Total)
 
 		// Check fields
-		assert.Equal(t, ticket.ID, records[0].PrimaryID)
+		assert.Equal(t, ticket.Id, records[0].PrimaryId)
 	}
 }

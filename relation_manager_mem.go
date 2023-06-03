@@ -67,7 +67,6 @@ func (rm *relationManagerMemory) AddMembers(members []*MemberEntry, upstream str
 			ChannelRules: me.ChannelRules,
 			RelationPath: rp,
 			Upstream:     upstream,
-			Downstreams:  make([]string, 0),
 		}
 
 		rm.members[m.Id] = m
@@ -96,9 +95,11 @@ func (rm *relationManagerMemory) MoveMembers(mids []string, upstream string) err
 
 		curPath := append(rp, mid)
 
-		// update downstreams
-		for _, dsid := range m.Downstreams {
-			rm.ChangePath(dsid, curPath)
+		// find and update downstreams
+		for _, ds := range rm.members {
+			if ds.Upstream == m.Id {
+				rm.ChangePath(ds.Id, curPath)
+			}
 		}
 	}
 

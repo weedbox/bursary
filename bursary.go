@@ -130,7 +130,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 
 	// Create a new ledger entry for Calculating rewards for ticket owner
 	le := &LedgerEntry{
-		ID:          t.ID,
+		Id:          t.Id,
 		Channel:     t.Channel,
 		MemberId:    t.MemberId,
 		Amount:      amount,
@@ -138,7 +138,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 		Desc:        t.Desc,
 		Info:        t.Info,
 		IsPrimary:   true,
-		PrimaryID:   t.ID,
+		PrimaryId:   t.Id,
 		CreatedAt:   t.CreatedAt,
 	}
 
@@ -166,13 +166,13 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 
 		// Create a new ledger entry for calculating feedback for upstreams
 		le := &LedgerEntry{
-			ID:        uuid.New().String(),
+			Id:        uuid.New().String(),
 			Channel:   t.Channel,
 			MemberId:  l.Id,
 			Desc:      t.Desc,
 			Info:      t.Info,
 			IsPrimary: false,
-			PrimaryID: le.PrimaryID,
+			PrimaryId: le.PrimaryId,
 			CreatedAt: t.CreatedAt,
 		}
 

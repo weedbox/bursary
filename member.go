@@ -5,7 +5,6 @@ type Member struct {
 	ChannelRules map[string]*Rule `json:"channelRules"`
 	RelationPath []string         `json:"relationPath"`
 	Upstream     string           `json:"upstream"`
-	Downstreams  []string         `json:"downstreams"`
 }
 
 func (m *Member) GetChannelRule(channel string) *Rule {

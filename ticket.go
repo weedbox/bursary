@@ -7,7 +7,7 @@ import (
 )
 
 type Ticket struct {
-	ID        string                 `json:"id"`
+	Id        string                 `json:"id"`
 	Channel   string                 `json:"channel"`
 	MemberId  string                 `json:"memberId"`
 	Amount    int64                  `json:"amount"`
@@ -20,7 +20,7 @@ type Ticket struct {
 
 func NewTicket() *Ticket {
 	return &Ticket{
-		ID:        uuid.New().String(),
+		Id:        uuid.New().String(),
 		Channel:   "default",
 		CreatedAt: time.Now(),
 	}
