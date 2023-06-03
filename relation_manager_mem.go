@@ -1,4 +1,4 @@
-package main
+package bursary
 
 type relationManagerMemory struct {
 	members map[string]*Member

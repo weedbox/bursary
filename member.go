@@ -1,4 +1,4 @@
-package main
+package bursary
 
 type Member struct {
 	Id           string           `json:"id"`

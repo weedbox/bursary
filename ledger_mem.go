@@ -1,4 +1,4 @@
-package main
+package bursary
 
 type ledgerMemory struct {
 	records []*LedgerEntry

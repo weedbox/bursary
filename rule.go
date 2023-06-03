@@ -1,4 +1,4 @@
-package main
+package bursary
 
 type Rule struct {
 	Commission float64 `json:"commission"`
