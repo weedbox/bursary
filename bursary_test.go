@@ -24,7 +24,7 @@ func Test_AddMembers(t *testing.T) {
 	err := bu.RelationManager().AddMembers([]*MemberEntry{
 		&MemberEntry{
 			Id: rootId,
-			Rules: map[string]*Rule{
+			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
 					Share:      0.2,
@@ -43,7 +43,7 @@ func Test_AddMembers(t *testing.T) {
 	err = bu.RelationManager().AddMembers([]*MemberEntry{
 		&MemberEntry{
 			Id: secondId,
-			Rules: map[string]*Rule{
+			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
 					Share:      0.3,
@@ -62,7 +62,7 @@ func Test_AddMembers(t *testing.T) {
 	err = bu.RelationManager().AddMembers([]*MemberEntry{
 		&MemberEntry{
 			Id: thirdId,
-			Rules: map[string]*Rule{
+			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.5,
 					Share:      0.5,
@@ -85,7 +85,7 @@ func Test_CalculateRewards(t *testing.T) {
 	levels := []*MemberEntry{
 		&MemberEntry{
 			Id: genTestId(),
-			Rules: map[string]*Rule{
+			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
 					Share:      0,
@@ -94,7 +94,7 @@ func Test_CalculateRewards(t *testing.T) {
 		},
 		&MemberEntry{
 			Id: genTestId(),
-			Rules: map[string]*Rule{
+			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
 					Share:      0.7,
@@ -103,7 +103,7 @@ func Test_CalculateRewards(t *testing.T) {
 		},
 		&MemberEntry{
 			Id: genTestId(),
-			Rules: map[string]*Rule{
+			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.5,
 					Share:      0.3,
@@ -128,7 +128,7 @@ func Test_CalculateRewards(t *testing.T) {
 
 	// Preparing a new ticket
 	ticket := NewTicket()
-	ticket.Rule = "default"
+	ticket.Channel = "default"
 	ticket.MemberId = levels[2].Id
 	ticket.Amount = 1000
 	ticket.Fee = 50
@@ -170,14 +170,14 @@ func Test_WriteTicket(t *testing.T) {
 	bu := NewBursary()
 	defer bu.Close()
 
-	// Create ledger named Slot A for testing
-	err := bu.LedgerManager().Add("Channel_A", NewLedgerMemory())
+	// Create ledger named default for testing channel
+	err := bu.LedgerManager().Add("default", NewLedgerMemory())
 	assert.Nil(t, err)
 
 	levels := []*MemberEntry{
 		&MemberEntry{
 			Id: genTestId(),
-			Rules: map[string]*Rule{
+			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
 					Share:      0,
@@ -186,7 +186,7 @@ func Test_WriteTicket(t *testing.T) {
 		},
 		&MemberEntry{
 			Id: genTestId(),
-			Rules: map[string]*Rule{
+			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
 					Share:      0.7,
@@ -195,7 +195,7 @@ func Test_WriteTicket(t *testing.T) {
 		},
 		&MemberEntry{
 			Id: genTestId(),
-			Rules: map[string]*Rule{
+			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.5,
 					Share:      0.3,
@@ -220,7 +220,7 @@ func Test_WriteTicket(t *testing.T) {
 
 	// Preparing a new ticket
 	ticket := NewTicket()
-	ticket.Rule = "default"
+	ticket.Channel = "default"
 	ticket.MemberId = levels[2].Id
 	ticket.Amount = 1000
 	ticket.Fee = 50
@@ -269,14 +269,14 @@ func Test_WriteEntries(t *testing.T) {
 	bu := NewBursary()
 	defer bu.Close()
 
-	// Create ledger named Slot A for testing
-	err := bu.LedgerManager().Add("Channel_A", NewLedgerMemory())
+	// Create ledger named default for testing channel
+	err := bu.LedgerManager().Add("default", NewLedgerMemory())
 	assert.Nil(t, err)
 
 	levels := []*MemberEntry{
 		&MemberEntry{
 			Id: genTestId(),
-			Rules: map[string]*Rule{
+			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
 					Share:      0,
@@ -285,7 +285,7 @@ func Test_WriteEntries(t *testing.T) {
 		},
 		&MemberEntry{
 			Id: genTestId(),
-			Rules: map[string]*Rule{
+			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
 					Share:      0.7,
@@ -294,7 +294,7 @@ func Test_WriteEntries(t *testing.T) {
 		},
 		&MemberEntry{
 			Id: genTestId(),
-			Rules: map[string]*Rule{
+			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.5,
 					Share:      0.3,
@@ -319,7 +319,7 @@ func Test_WriteEntries(t *testing.T) {
 
 	// Preparing a new ticket
 	ticket := NewTicket()
-	ticket.Rule = "default"
+	ticket.Channel = "default"
 	ticket.MemberId = levels[2].Id
 	ticket.Amount = 1000
 	ticket.Fee = 50
@@ -349,13 +349,13 @@ func Test_WriteEntries(t *testing.T) {
 	}
 
 	// Write to channel ledger
-	err = bu.WriteEntries("Channel_A", entries)
+	err = bu.WriteEntries("default", entries)
 	assert.Nil(t, err)
 
 	// Check results
 	for i, l := range levels {
 
-		sl, err := bu.LedgerManager().Get("Channel_A")
+		sl, err := bu.LedgerManager().Get("default")
 		if !assert.Nil(t, err) {
 			continue
 		}

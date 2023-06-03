@@ -121,8 +121,12 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 		return nil, err
 	}
 
-	// Getting default rule
-	r := m.GetRule(t.Rule)
+	// Getting rule for specific channel
+	r := m.GetChannelRule(t.Channel)
+	if r == nil {
+		// Using default rule if it doesn't exist
+		r = &DefaultRule
+	}
 
 	// Create a new ledger entry for Calculating rewards for ticket owner
 	le := &LedgerEntry{
@@ -158,7 +162,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 	for i, l := range levels {
 
 		// Getting default rule
-		r := l.GetRule(t.Rule)
+		r := l.GetChannelRule(t.Channel)
 
 		// Create a new ledger entry for calculating feedback for upstreams
 		le := &LedgerEntry{

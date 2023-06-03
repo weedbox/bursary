@@ -64,7 +64,7 @@ func (rm *relationManagerMemory) AddMembers(members []*MemberEntry, upstream str
 
 		m := &Member{
 			Id:           me.Id,
-			Rules:        me.Rules,
+			ChannelRules: me.ChannelRules,
 			RelationPath: rp,
 			Upstream:     upstream,
 			Downstreams:  make([]string, 0),
@@ -172,26 +172,36 @@ func (rm *relationManagerMemory) ListMembers(cond *Condition) ([]*Member, error)
 	return members, nil
 }
 
-func (rm *relationManagerMemory) UpdateRule(mid string, ruleName string, rule *Rule) error {
+func (rm *relationManagerMemory) UpdateChannelRule(mid string, channel string, rule *Rule) error {
 
 	m, err := rm.GetMember(mid)
 	if err != nil {
 		return err
 	}
 
-	m.Rules[ruleName] = rule
+	m.ChannelRules[channel] = rule
 
 	return nil
 }
 
-func (rm *relationManagerMemory) RemoveRule(mid string, ruleName string) error {
+func (rm *relationManagerMemory) RemoveChannelRule(mid string, channel string) error {
 
 	m, err := rm.GetMember(mid)
 	if err != nil {
 		return err
 	}
 
-	delete(m.Rules, ruleName)
+	delete(m.ChannelRules, channel)
+
+	return nil
+}
+
+func (rm *relationManagerMemory) RemoveChannel(channel string) error {
+
+	// Remove specific channel rule from all members
+	for _, m := range rm.members {
+		delete(m.ChannelRules, channel)
+	}
 
 	return nil
 }

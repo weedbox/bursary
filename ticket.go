@@ -10,7 +10,6 @@ type Ticket struct {
 	ID        string                 `json:"id"`
 	Channel   string                 `json:"channel"`
 	MemberId  string                 `json:"memberId"`
-	Rule      string                 `json:"rule"`
 	Amount    int64                  `json:"amount"`
 	Fee       int64                  `json:"fee"`
 	Total     int64                  `json:"total"`
@@ -22,6 +21,7 @@ type Ticket struct {
 func NewTicket() *Ticket {
 	return &Ticket{
 		ID:        uuid.New().String(),
+		Channel:   "default",
 		CreatedAt: time.Now(),
 	}
 }

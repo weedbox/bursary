@@ -10,8 +10,8 @@ var (
 )
 
 type MemberEntry struct {
-	Id    string           `json:"id"`
-	Rules map[string]*Rule `json:"rules"`
+	Id           string           `json:"id"`
+	ChannelRules map[string]*Rule `json:"channelRules"`
 }
 
 type RelationManager interface {
@@ -21,7 +21,8 @@ type RelationManager interface {
 	DeleteMembers(mids []string) error
 	GetUpstreams(mid string) ([]*Member, error)
 	ListMembers(cond *Condition) ([]*Member, error)
-	UpdateRule(mid string, ruleName string, rule *Rule) error
-	RemoveRule(mid string, ruleName string) error
+	UpdateChannelRule(mid string, channel string, rule *Rule) error
+	RemoveChannelRule(mid string, channel string) error
+	RemoveChannel(channel string) error
 	Close() error
 }
