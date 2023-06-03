@@ -2,6 +2,8 @@ package main
 
 import (
 	"math"
+
+	"github.com/google/uuid"
 )
 
 type Bursary interface {
@@ -10,7 +12,9 @@ type Bursary interface {
 	GeneralLedger() Ledger
 	GetLevels(memberId string) ([]*Member, error)
 	CalculateRewards(t *Ticket) ([]*LedgerEntry, error)
-	CreateTicket(t *Ticket) error
+	WriteTicket(t *Ticket) error
+	WriteEntry(le *LedgerEntry) error
+	WriteEntries(ledgerName string, entries []*LedgerEntry) error
 	Close() error
 }
 
@@ -107,10 +111,11 @@ func (b *bursary) GetLevels(memberId string) ([]*Member, error) {
 
 func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 
-	// Initial
+	// Initial rewards
 	amount := t.Amount
 	fee := t.Fee
 
+	// Find out the member
 	m, err := b.rm.GetMember(t.MemberId)
 	if err != nil {
 		return nil, err
@@ -121,12 +126,15 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 
 	// Create a new ledger entry for Calculating rewards for ticket owner
 	le := &LedgerEntry{
+		ID:          t.ID,
+		Channel:     t.Channel,
 		MemberId:    t.MemberId,
 		Amount:      amount,
-		Commissions: int(math.Floor(float64(fee) * r.Commission)),
+		Commissions: int64(math.Floor(float64(fee) * r.Commission)),
 		Desc:        t.Desc,
 		Info:        t.Info,
-		IsDirect:    true,
+		IsPrimary:   true,
+		PrimaryID:   t.ID,
 		CreatedAt:   t.CreatedAt,
 	}
 
@@ -152,11 +160,15 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 		// Getting default rule
 		r := l.GetRule(t.Rule)
 
+		// Create a new ledger entry for calculating feedback for upstreams
 		le := &LedgerEntry{
+			ID:        uuid.New().String(),
+			Channel:   t.Channel,
 			MemberId:  l.Id,
 			Desc:      t.Desc,
 			Info:      t.Info,
-			IsDirect:  false,
+			IsPrimary: false,
+			PrimaryID: le.PrimaryID,
 			CreatedAt: t.CreatedAt,
 		}
 
@@ -165,14 +177,16 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 			//Note: Avoid precision problem
 			cormissionShare = ((r.Commission * 100) - (cormissionShare * 100)) * 0.01
 
-			// Calculating amount and cormissions by rules
+			// Calculating amount
+			rawAmount := float64(t.Amount) * prevRule.Share
 			if t.Amount < 0 {
-				le.Amount = int(math.Floor(float64(t.Amount) * prevRule.Share))
+				le.Amount = int64(math.Floor(rawAmount))
 			} else {
-				le.Amount = int(math.Ceil(float64(t.Amount) * prevRule.Share))
+				le.Amount = int64(math.Ceil(rawAmount))
 			}
 
-			le.Commissions = int(math.Floor(float64(t.Fee) * cormissionShare))
+			// Calculating cormissions
+			le.Commissions = int64(math.Floor(float64(t.Fee) * cormissionShare))
 			le.Total = le.Amount + le.Commissions
 
 			amount -= le.Amount
@@ -193,7 +207,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 	return entries, nil
 }
 
-func (b *bursary) CreateTicket(t *Ticket) error {
+func (b *bursary) WriteTicket(t *Ticket) error {
 
 	entries, err := b.CalculateRewards(t)
 	if err != nil {
@@ -201,18 +215,24 @@ func (b *bursary) CreateTicket(t *Ticket) error {
 	}
 
 	// Write reward results to general ledger
-	err = b.gl.WriteRecords(entries)
+	return b.gl.WriteRecords(entries)
+}
+
+func (b *bursary) WriteEntry(le *LedgerEntry) error {
+
+	// Attempt to find ledger for specific channel
+	l, err := b.lm.Get(le.Channel)
 	if err != nil {
 		return err
 	}
 
-	// No need to write to other ledger
-	if len(t.LedgerId) == 0 {
-		return nil
-	}
+	return l.WriteRecords([]*LedgerEntry{le})
+}
 
-	// Write to specifc ledger
-	l, err := b.lm.Get(t.LedgerId)
+func (b *bursary) WriteEntries(ledgerName string, entries []*LedgerEntry) error {
+
+	// Attempt to find ledger for specific channel
+	l, err := b.lm.Get(ledgerName)
 	if err != nil {
 		return err
 	}

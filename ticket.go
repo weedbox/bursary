@@ -1,15 +1,27 @@
 package main
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Ticket struct {
-	LedgerId  string                 `json:"ledgerId"`
+	ID        string                 `json:"id"`
+	Channel   string                 `json:"channel"`
 	MemberId  string                 `json:"memberId"`
 	Rule      string                 `json:"rule"`
-	Amount    int                    `json:"amount"`
-	Fee       int                    `json:"fee"`
-	Total     int                    `json:"total"`
+	Amount    int64                  `json:"amount"`
+	Fee       int64                  `json:"fee"`
+	Total     int64                  `json:"total"`
 	Desc      string                 `json:"desc"`
 	Info      map[string]interface{} `json:"info"`
 	CreatedAt time.Time              `json:"createdAt"`
+}
+
+func NewTicket() *Ticket {
+	return &Ticket{
+		ID:        uuid.New().String(),
+		CreatedAt: time.Now(),
+	}
 }
