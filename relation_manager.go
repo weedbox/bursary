@@ -2,9 +2,12 @@ package bursary
 
 import (
 	"errors"
+
+	"github.com/google/uuid"
 )
 
 var (
+	ErrMemberRequired   = errors.New("bursary: require member")
 	ErrMemberNotFound   = errors.New("bursary: member not found")
 	ErrUpstreamNotFound = errors.New("bursary: upstream not found")
 )
@@ -25,4 +28,11 @@ type RelationManager interface {
 	RemoveChannelRule(mid string, channel string) error
 	RemoveChannel(channel string) error
 	Close() error
+}
+
+func NewMemberEntry() *MemberEntry {
+	return &MemberEntry{
+		Id:           uuid.New().String(),
+		ChannelRules: make(map[string]*Rule),
+	}
 }
