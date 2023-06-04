@@ -170,6 +170,68 @@ func Test_RelationManager_DeleteMembers(t *testing.T) {
 	}
 }
 
+func Test_RelationManager_ListMembers(t *testing.T) {
+
+	defer uninit()
+
+	var members []*bursary.MemberEntry
+
+	// Preparing members
+	me := bursary.NewMemberEntry()
+	me.ChannelRules["default"] = &bursary.Rule{
+		Commission: 1.0,
+		Share:      0,
+	}
+	members = append(members, me)
+
+	me = bursary.NewMemberEntry()
+	me.ChannelRules["default"] = &bursary.Rule{
+		Commission: 0.7,
+		Share:      0.7,
+	}
+	members = append(members, me)
+
+	me = bursary.NewMemberEntry()
+	me.ChannelRules["default"] = &bursary.Rule{
+		Commission: 0.5,
+		Share:      0.3,
+	}
+	members = append(members, me)
+
+	// Add members to manager
+	err := testBu.RelationManager().AddMembers(members, "")
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	// General list
+	cond := bursary.NewCondition()
+	ms, err := testBu.RelationManager().ListMembers("", cond)
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	assert.Len(t, ms, 3)
+
+	// Pagination (Limit=1)
+	cond.Limit = 1
+	ms, err = testBu.RelationManager().ListMembers("", cond)
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	assert.Len(t, ms, 1)
+
+	// Pagination (Limit=1, Page=2)
+	cond.Page = 2
+	ms, err = testBu.RelationManager().ListMembers("", cond)
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	assert.Len(t, ms, 1)
+}
+
 func Test_RelationManager_ChangePath(t *testing.T) {
 
 	defer uninit()

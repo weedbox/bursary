@@ -25,7 +25,7 @@ type RelationManager interface {
 	GetMember(mid string) (*Member, error)
 	GetUpstreams(mid string) ([]*Member, error)
 	MoveMembers(mids []string, upstream string) error
-	ListMembers(cond *Condition) ([]*Member, error)
+	ListMembers(upstream string, cond *Condition) ([]*Member, error)
 	UpdateChannelRule(mid string, channel string, rule *Rule) error
 	RemoveChannelRule(mid string, channel string) error
 	RemoveChannel(channel string) error

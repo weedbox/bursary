@@ -292,8 +292,36 @@ func (rm *RelationManager) GetUpstreams(mid string) ([]*bursary.Member, error) {
 	return members, nil
 }
 
-func (rm *RelationManager) ListMembers(cond *bursary.Condition) ([]*bursary.Member, error) {
+func (rm *RelationManager) ListMembers(upstream string, cond *bursary.Condition) ([]*bursary.Member, error) {
+
+	if cond == nil {
+		cond = bursary.NewCondition()
+	}
+
+	if len(upstream) == 0 {
+		upstream = RootNode
+	}
+
 	members := make([]*bursary.Member, 0)
+
+	offset := (cond.Page - 1) * cond.Limit
+
+	cmd := fmt.Sprintf(`SELECT * FROM %s WHERE upstream = $1 OFFSET $2 LIMIT $3`, rm.tableName)
+	rows, err := rm.db.Queryx(cmd, upstream, offset, cond.Limit)
+	if err != nil {
+		return members, err
+	}
+
+	record := &MemberRecord{}
+	for rows.Next() {
+		err := rows.StructScan(&record)
+		if err != nil {
+			return members, err
+		}
+
+		members = append(members, record.ToMemberObject())
+	}
+
 	return members, nil
 }
 

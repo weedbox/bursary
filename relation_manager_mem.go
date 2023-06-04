@@ -138,7 +138,7 @@ func (rm *relationManagerMemory) GetUpstreams(mid string) ([]*Member, error) {
 	return members, nil
 }
 
-func (rm *relationManagerMemory) ListMembers(cond *Condition) ([]*Member, error) {
+func (rm *relationManagerMemory) ListMembers(upstream string, cond *Condition) ([]*Member, error) {
 
 	if cond.Page < 1 {
 		cond.Page = 1
@@ -155,6 +155,10 @@ func (rm *relationManagerMemory) ListMembers(cond *Condition) ([]*Member, error)
 	count := 0
 	cur := 0
 	for _, m := range rm.members {
+
+		if m.Upstream != upstream {
+			continue
+		}
 
 		if cur < start {
 			cur++

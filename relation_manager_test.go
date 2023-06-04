@@ -55,19 +55,19 @@ func Test_RelationManager_ListMembers(t *testing.T) {
 		prevLevel = l.Id
 	}
 
-	members, err := bu.RelationManager().ListMembers(&Condition{
+	members, err := bu.RelationManager().ListMembers("", &Condition{
 		Page:  1,
 		Limit: 2,
 	})
 	assert.Nil(t, err)
-	assert.Len(t, members, 2)
+	assert.Len(t, members, 1)
 
-	members, err = bu.RelationManager().ListMembers(&Condition{
+	members, err = bu.RelationManager().ListMembers("", &Condition{
 		Page:  2,
 		Limit: 1,
 	})
 	assert.Nil(t, err)
-	assert.Len(t, members, 1)
+	assert.Len(t, members, 0)
 }
 
 func Test_RelationManager_RemoveChannel(t *testing.T) {
@@ -122,7 +122,7 @@ func Test_RelationManager_RemoveChannel(t *testing.T) {
 	err := bu.RelationManager().RemoveChannel("default")
 	assert.Nil(t, err)
 
-	members, err := bu.RelationManager().ListMembers(&Condition{
+	members, err := bu.RelationManager().ListMembers("", &Condition{
 		Page:  1,
 		Limit: 10,
 	})

@@ -18,3 +18,10 @@ type SortField struct {
 	Field     string `json:"field"`
 	Ascending bool   `json:"asc"`
 }
+
+func NewCondition() *Condition {
+	return &Condition{
+		Page:  1,
+		Limit: 20,
+	}
+}
