@@ -15,15 +15,15 @@ import (
 
 const RootNode = "00000000-0000-0000-0000-000000000000"
 
-type Opt func(*RelationManager)
+type Opt func(*RelationManagerPostgres)
 
-type RelationManager struct {
+type RelationManagerPostgres struct {
 	db        *sqlx.DB
 	tableName string
 }
 
-func NewRelationManager(opts ...Opt) *RelationManager {
-	rm := &RelationManager{}
+func NewRelationManagerPostgres(opts ...Opt) *RelationManagerPostgres {
+	rm := &RelationManagerPostgres{}
 
 	for _, opt := range opts {
 		opt(rm)
@@ -37,18 +37,18 @@ func NewRelationManager(opts ...Opt) *RelationManager {
 }
 
 func WithDb(db *sqlx.DB) Opt {
-	return func(rm *RelationManager) {
+	return func(rm *RelationManagerPostgres) {
 		rm.db = db
 	}
 }
 
 func WithTableName(tableName string) Opt {
-	return func(rm *RelationManager) {
+	return func(rm *RelationManagerPostgres) {
 		rm.tableName = tableName
 	}
 }
 
-func (rm *RelationManager) Init() error {
+func (rm *RelationManagerPostgres) Init() error {
 
 	// Initializing table
 	m := sqlxmigrate.New(rm.db, sqlxmigrate.DefaultOptions, []*sqlxmigrate.Migration{
@@ -83,11 +83,11 @@ func (rm *RelationManager) Init() error {
 	return nil
 }
 
-func (rm *RelationManager) Close() error {
+func (rm *RelationManagerPostgres) Close() error {
 	return rm.db.Close()
 }
 
-func (rm *RelationManager) GetPath(mid string) ([]string, error) {
+func (rm *RelationManagerPostgres) GetPath(mid string) ([]string, error) {
 
 	if len(mid) == 0 {
 		return []string{}, nil
@@ -107,7 +107,7 @@ func (rm *RelationManager) GetPath(mid string) ([]string, error) {
 	return p, nil
 }
 
-func (rm *RelationManager) ChangePathByUpstream(upstream string, newPath []string) error {
+func (rm *RelationManagerPostgres) ChangePathByUpstream(upstream string, newPath []string) error {
 
 	if len(upstream) == 0 {
 		upstream = RootNode
@@ -134,7 +134,7 @@ func (rm *RelationManager) ChangePathByUpstream(upstream string, newPath []strin
 	return err
 }
 
-func (rm *RelationManager) ChangePath(mid string, newPath []string) error {
+func (rm *RelationManagerPostgres) ChangePath(mid string, newPath []string) error {
 
 	cmd := fmt.Sprintf(`UPDATE %s SET relation_path = $1 WHERE id = $2`, rm.tableName)
 	_, err := rm.db.Exec(cmd, pq.StringArray(newPath), mid)
@@ -147,7 +147,7 @@ func (rm *RelationManager) ChangePath(mid string, newPath []string) error {
 	return rm.ChangePathByUpstream(mid, curPath)
 }
 
-func (rm *RelationManager) GetMember(mid string) (*bursary.Member, error) {
+func (rm *RelationManagerPostgres) GetMember(mid string) (*bursary.Member, error) {
 
 	if len(mid) == 0 {
 		return nil, bursary.ErrMemberNotFound
@@ -167,7 +167,7 @@ func (rm *RelationManager) GetMember(mid string) (*bursary.Member, error) {
 	return records[0].ToMemberObject(), nil
 }
 
-func (rm *RelationManager) AddMembers(members []*bursary.MemberEntry, upstream string) error {
+func (rm *RelationManagerPostgres) AddMembers(members []*bursary.MemberEntry, upstream string) error {
 
 	if len(members) == 0 {
 		return bursary.ErrMemberRequired
@@ -231,7 +231,7 @@ func (rm *RelationManager) AddMembers(members []*bursary.MemberEntry, upstream s
 	return err
 }
 
-func (rm *RelationManager) MoveMembers(mids []string, upstream string) error {
+func (rm *RelationManagerPostgres) MoveMembers(mids []string, upstream string) error {
 
 	rp, err := rm.GetPath(upstream)
 	if err != nil {
@@ -258,7 +258,7 @@ func (rm *RelationManager) MoveMembers(mids []string, upstream string) error {
 	return nil
 }
 
-func (rm *RelationManager) DeleteMembers(mids []string) error {
+func (rm *RelationManagerPostgres) DeleteMembers(mids []string) error {
 
 	cmd := fmt.Sprintf(`DELETE FROM %s WHERE id = ANY ($1)`, rm.tableName)
 	_, err := rm.db.Exec(cmd, pq.Array(mids))
@@ -266,7 +266,7 @@ func (rm *RelationManager) DeleteMembers(mids []string) error {
 	return err
 }
 
-func (rm *RelationManager) GetUpstreams(mid string) ([]*bursary.Member, error) {
+func (rm *RelationManagerPostgres) GetUpstreams(mid string) ([]*bursary.Member, error) {
 
 	members := make([]*bursary.Member, 0)
 
@@ -292,7 +292,7 @@ func (rm *RelationManager) GetUpstreams(mid string) ([]*bursary.Member, error) {
 	return members, nil
 }
 
-func (rm *RelationManager) ListMembers(upstream string, cond *bursary.Condition) ([]*bursary.Member, error) {
+func (rm *RelationManagerPostgres) ListMembers(upstream string, cond *bursary.Condition) ([]*bursary.Member, error) {
 
 	if cond == nil {
 		cond = bursary.NewCondition()
@@ -325,7 +325,7 @@ func (rm *RelationManager) ListMembers(upstream string, cond *bursary.Condition)
 	return members, nil
 }
 
-func (rm *RelationManager) UpdateChannelRule(mid string, channel string, rule *bursary.Rule) error {
+func (rm *RelationManagerPostgres) UpdateChannelRule(mid string, channel string, rule *bursary.Rule) error {
 
 	if rule == nil {
 		return nil
@@ -339,7 +339,7 @@ func (rm *RelationManager) UpdateChannelRule(mid string, channel string, rule *b
 	return err
 }
 
-func (rm *RelationManager) RemoveChannelRule(mid string, channel string) error {
+func (rm *RelationManagerPostgres) RemoveChannelRule(mid string, channel string) error {
 
 	cmd := fmt.Sprintf(`UPDATE %s SET channel_rules = channel_rules - $1 WHERE id = $2`, rm.tableName)
 	_, err := rm.db.Exec(cmd, channel, mid)
@@ -347,7 +347,7 @@ func (rm *RelationManager) RemoveChannelRule(mid string, channel string) error {
 	return err
 }
 
-func (rm *RelationManager) RemoveChannel(channel string) error {
+func (rm *RelationManagerPostgres) RemoveChannel(channel string) error {
 
 	cmd := fmt.Sprintf(`UPDATE %s SET channel_rules = channel_rules - $1`, rm.tableName)
 	_, err := rm.db.Exec(cmd, channel)

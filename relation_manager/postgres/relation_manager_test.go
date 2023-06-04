@@ -14,7 +14,7 @@ import (
 
 var testDb *sqlx.DB
 var testTable = "relationships_test"
-var testRM *RelationManager
+var testRM *RelationManagerPostgres
 var testBu bursary.Bursary
 
 func init() {
@@ -27,7 +27,7 @@ func init() {
 
 	testDb = db
 
-	rm := NewRelationManager(
+	rm := NewRelationManagerPostgres(
 		WithDb(testDb),
 		WithTableName(testTable),
 	)
