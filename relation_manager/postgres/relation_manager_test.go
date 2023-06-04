@@ -205,6 +205,69 @@ func Test_RelationManager_ChangePath(t *testing.T) {
 	assert.Equal(t, "test2", paths[1])
 }
 
+func Test_RelationManager_MoveMembers(t *testing.T) {
+
+	defer uninit()
+
+	var levels []*bursary.MemberEntry
+
+	// Preparing members
+	me := bursary.NewMemberEntry()
+	me.ChannelRules["default"] = &bursary.Rule{
+		Commission: 1.0,
+		Share:      0,
+	}
+	levels = append(levels, me)
+
+	me = bursary.NewMemberEntry()
+	me.ChannelRules["default"] = &bursary.Rule{
+		Commission: 0.7,
+		Share:      0.7,
+	}
+	levels = append(levels, me)
+
+	me = bursary.NewMemberEntry()
+	me.ChannelRules["default"] = &bursary.Rule{
+		Commission: 0.5,
+		Share:      0.3,
+	}
+	levels = append(levels, me)
+
+	// Add members to manager
+	prevLevel := ""
+	for _, l := range levels {
+
+		// Create a new member
+		err := testBu.RelationManager().AddMembers([]*bursary.MemberEntry{
+			l,
+		}, prevLevel)
+		if !assert.Nil(t, err) {
+			break
+		}
+
+		prevLevel = l.Id
+	}
+
+	// Move members to root
+	err := testBu.RelationManager().MoveMembers([]string{levels[1].Id}, "")
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	// Check path
+	m, err := testBu.RelationManager().GetMember(levels[1].Id)
+	assert.Nil(t, err)
+	assert.Equal(t, RootNode, m.Upstream)
+	assert.Len(t, m.RelationPath, 0)
+
+	// Check second level
+	m, err = testBu.RelationManager().GetMember(levels[2].Id)
+	assert.Nil(t, err)
+	assert.Equal(t, levels[1].Id, m.Upstream)
+	assert.Len(t, m.RelationPath, 1)
+	assert.Equal(t, levels[1].Id, m.RelationPath[0])
+}
+
 func Test_RelationManager_GetUpstreams(t *testing.T) {
 
 	defer uninit()

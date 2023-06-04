@@ -13,6 +13,8 @@ import (
 	"github.com/weedbox/bursary"
 )
 
+const RootNode = "00000000-0000-0000-0000-000000000000"
+
 type Opt func(*RelationManager)
 
 type RelationManager struct {
@@ -105,12 +107,44 @@ func (rm *RelationManager) GetPath(mid string) ([]string, error) {
 	return p, nil
 }
 
+func (rm *RelationManager) ChangePathByUpstream(upstream string, newPath []string) error {
+
+	if len(upstream) == 0 {
+		upstream = RootNode
+	}
+
+	cmd := fmt.Sprintf(`UPDATE %s SET relation_path = $1 WHERE upstream = $2 RETURNING id`, rm.tableName)
+	rows, err := rm.db.Queryx(cmd, pq.StringArray(newPath), upstream)
+
+	// Update downstreams
+	record := &MemberRecord{}
+	for rows.Next() {
+		err := rows.StructScan(&record)
+		if err != nil {
+			return err
+		}
+
+		curPath := append(newPath, record.Id)
+		err = rm.ChangePathByUpstream(record.Id, curPath)
+		if err != nil {
+			return err
+		}
+	}
+
+	return err
+}
+
 func (rm *RelationManager) ChangePath(mid string, newPath []string) error {
 
 	cmd := fmt.Sprintf(`UPDATE %s SET relation_path = $1 WHERE id = $2`, rm.tableName)
 	_, err := rm.db.Exec(cmd, pq.StringArray(newPath), mid)
+	if err != nil {
+		return err
+	}
 
-	return err
+	// Update downstreams
+	curPath := append(newPath, mid)
+	return rm.ChangePathByUpstream(mid, curPath)
 }
 
 func (rm *RelationManager) GetMember(mid string) (*bursary.Member, error) {
@@ -149,7 +183,7 @@ func (rm *RelationManager) AddMembers(members []*bursary.MemberEntry, upstream s
 	_, err = uuid.Parse(upstream)
 	if err != nil {
 		// For root node
-		upstream = "00000000-0000-0000-0000-000000000000"
+		upstream = RootNode
 	}
 
 	// Current timestamp
@@ -198,6 +232,29 @@ func (rm *RelationManager) AddMembers(members []*bursary.MemberEntry, upstream s
 }
 
 func (rm *RelationManager) MoveMembers(mids []string, upstream string) error {
+
+	rp, err := rm.GetPath(upstream)
+	if err != nil {
+		return bursary.ErrUpstreamNotFound
+	}
+
+	if len(upstream) == 0 {
+		upstream = RootNode
+	}
+
+	// update members
+	cmd := fmt.Sprintf(`UPDATE %s SET upstream = $1, relation_path = $2 WHERE id = ANY ($3)`, rm.tableName)
+	_, err = rm.db.Exec(cmd, upstream, pq.StringArray(rp), pq.Array(mids))
+	if err != nil {
+		return err
+	}
+
+	// update downstreams
+	for _, mid := range mids {
+		curPath := append(rp, mid)
+		rm.ChangePathByUpstream(mid, curPath)
+	}
+
 	return nil
 }
 
