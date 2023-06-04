@@ -2,6 +2,7 @@ package relation_manager_postgres
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -240,13 +241,31 @@ func (rm *RelationManager) ListMembers(cond *bursary.Condition) ([]*bursary.Memb
 }
 
 func (rm *RelationManager) UpdateChannelRule(mid string, channel string, rule *bursary.Rule) error {
-	return nil
+
+	if rule == nil {
+		return nil
+	}
+
+	ruleData, _ := json.Marshal(rule)
+
+	cmd := fmt.Sprintf(`UPDATE %s SET channel_rules = jsonb_set(channel_rules, '{%s}', $1::jsonb) WHERE id = $2`, rm.tableName, channel)
+	_, err := rm.db.Exec(cmd, ruleData, mid)
+
+	return err
 }
 
 func (rm *RelationManager) RemoveChannelRule(mid string, channel string) error {
-	return nil
+
+	cmd := fmt.Sprintf(`UPDATE %s SET channel_rules = channel_rules - $1 WHERE id = $2`, rm.tableName)
+	_, err := rm.db.Exec(cmd, channel, mid)
+
+	return err
 }
 
 func (rm *RelationManager) RemoveChannel(channel string) error {
-	return nil
+
+	cmd := fmt.Sprintf(`UPDATE %s SET channel_rules = channel_rules - $1`, rm.tableName)
+	_, err := rm.db.Exec(cmd, channel)
+
+	return err
 }

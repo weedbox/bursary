@@ -258,3 +258,149 @@ func Test_RelationManager_GetUpstreams(t *testing.T) {
 	assert.Equal(t, members[0].Id, levels[0].Id)
 	assert.Equal(t, members[1].Id, levels[1].Id)
 }
+
+func Test_RelationManager_UpdateChannelRule(t *testing.T) {
+
+	defer uninit()
+
+	// Preparing members
+	me := bursary.NewMemberEntry()
+	me.ChannelRules["default"] = &bursary.Rule{
+		Commission: 1.0,
+		Share:      0,
+	}
+
+	// Create a new member
+	err := testBu.RelationManager().AddMembers([]*bursary.MemberEntry{
+		me,
+	}, "")
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	// Update rule
+	err = testBu.RelationManager().UpdateChannelRule(me.Id, "default", &bursary.Rule{
+		Commission: 0.5,
+		Share:      33,
+	})
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	// Add a new rule
+	err = testBu.RelationManager().UpdateChannelRule(me.Id, "new", &bursary.Rule{
+		Commission: 0.99,
+		Share:      99,
+	})
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	// Get new member info
+	m, err := testBu.RelationManager().GetMember(me.Id)
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	assert.Equal(t, float64(0.5), m.ChannelRules["default"].Commission)
+	assert.Equal(t, float64(33), m.ChannelRules["default"].Share)
+
+	assert.Equal(t, float64(0.99), m.ChannelRules["new"].Commission)
+	assert.Equal(t, float64(99), m.ChannelRules["new"].Share)
+}
+
+func Test_RelationManager_RemoveChannelRule(t *testing.T) {
+
+	defer uninit()
+
+	// Preparing members
+	me := bursary.NewMemberEntry()
+	me.ChannelRules["default"] = &bursary.Rule{
+		Commission: 1.0,
+		Share:      0,
+	}
+
+	// Create a new member
+	err := testBu.RelationManager().AddMembers([]*bursary.MemberEntry{
+		me,
+	}, "")
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	// Remove rule
+	err = testBu.RelationManager().RemoveChannelRule(me.Id, "default")
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	// Get new member info
+	m, err := testBu.RelationManager().GetMember(me.Id)
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	assert.Nil(t, m.ChannelRules["default"])
+}
+
+func Test_RelationManager_RemoveChannel(t *testing.T) {
+
+	defer uninit()
+
+	var levels []*bursary.MemberEntry
+
+	// Preparing members
+	me := bursary.NewMemberEntry()
+	me.ChannelRules["default"] = &bursary.Rule{
+		Commission: 1.0,
+		Share:      0,
+	}
+	levels = append(levels, me)
+
+	me = bursary.NewMemberEntry()
+	me.ChannelRules["default"] = &bursary.Rule{
+		Commission: 0.7,
+		Share:      0.7,
+	}
+	levels = append(levels, me)
+
+	me = bursary.NewMemberEntry()
+	me.ChannelRules["default"] = &bursary.Rule{
+		Commission: 0.5,
+		Share:      0.3,
+	}
+	levels = append(levels, me)
+
+	// Add members to manager
+	prevLevel := ""
+	for _, l := range levels {
+
+		// Create a new member
+		err := testBu.RelationManager().AddMembers([]*bursary.MemberEntry{
+			l,
+		}, prevLevel)
+		if !assert.Nil(t, err) {
+			break
+		}
+
+		prevLevel = l.Id
+	}
+
+	// Remvoe specific channel
+	err := testBu.RelationManager().RemoveChannel("default")
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	// Check members
+	for _, l := range levels {
+
+		// Check if member exists
+		m, err := testBu.RelationManager().GetMember(l.Id)
+		if !assert.Nil(t, err) {
+			continue
+		}
+
+		assert.Nil(t, m.ChannelRules["default"])
+	}
+}
