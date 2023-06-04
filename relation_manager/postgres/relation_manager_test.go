@@ -53,7 +53,7 @@ func uninit() {
 	}
 }
 
-func Test_RelationManager_AddMembers(t *testing.T) {
+func Test_RelationManagerPostgres_AddMembers(t *testing.T) {
 
 	defer uninit()
 
@@ -107,7 +107,7 @@ func Test_RelationManager_AddMembers(t *testing.T) {
 	}
 }
 
-func Test_RelationManager_DeleteMembers(t *testing.T) {
+func Test_RelationManagerPostgres_DeleteMembers(t *testing.T) {
 
 	defer uninit()
 
@@ -170,7 +170,7 @@ func Test_RelationManager_DeleteMembers(t *testing.T) {
 	}
 }
 
-func Test_RelationManager_ListMembers(t *testing.T) {
+func Test_RelationManagerPostgres_ListMembers(t *testing.T) {
 
 	defer uninit()
 
@@ -232,7 +232,7 @@ func Test_RelationManager_ListMembers(t *testing.T) {
 	assert.Len(t, ms, 1)
 }
 
-func Test_RelationManager_ChangePath(t *testing.T) {
+func Test_RelationManagerPostgres_ChangePath(t *testing.T) {
 
 	defer uninit()
 
@@ -267,7 +267,7 @@ func Test_RelationManager_ChangePath(t *testing.T) {
 	assert.Equal(t, "test2", paths[1])
 }
 
-func Test_RelationManager_MoveMembers(t *testing.T) {
+func Test_RelationManagerPostgres_MoveMembers(t *testing.T) {
 
 	defer uninit()
 
@@ -330,7 +330,7 @@ func Test_RelationManager_MoveMembers(t *testing.T) {
 	assert.Equal(t, levels[1].Id, m.RelationPath[0])
 }
 
-func Test_RelationManager_GetUpstreams(t *testing.T) {
+func Test_RelationManagerPostgres_GetUpstreams(t *testing.T) {
 
 	defer uninit()
 
@@ -384,7 +384,7 @@ func Test_RelationManager_GetUpstreams(t *testing.T) {
 	assert.Equal(t, members[1].Id, levels[1].Id)
 }
 
-func Test_RelationManager_UpdateChannelRule(t *testing.T) {
+func Test_RelationManagerPostgres_UpdateChannelRule(t *testing.T) {
 
 	defer uninit()
 
@@ -434,7 +434,7 @@ func Test_RelationManager_UpdateChannelRule(t *testing.T) {
 	assert.Equal(t, float64(99), m.ChannelRules["new"].Share)
 }
 
-func Test_RelationManager_RemoveChannelRule(t *testing.T) {
+func Test_RelationManagerPostgres_RemoveChannelRule(t *testing.T) {
 
 	defer uninit()
 
@@ -468,7 +468,7 @@ func Test_RelationManager_RemoveChannelRule(t *testing.T) {
 	assert.Nil(t, m.ChannelRules["default"])
 }
 
-func Test_RelationManager_RemoveChannel(t *testing.T) {
+func Test_RelationManagerPostgres_RemoveChannel(t *testing.T) {
 
 	defer uninit()
 
