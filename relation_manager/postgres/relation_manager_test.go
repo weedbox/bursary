@@ -170,6 +170,41 @@ func Test_RelationManager_DeleteMembers(t *testing.T) {
 	}
 }
 
+func Test_RelationManager_ChangePath(t *testing.T) {
+
+	defer uninit()
+
+	// Preparing members
+	me := bursary.NewMemberEntry()
+	me.ChannelRules["default"] = &bursary.Rule{
+		Commission: 1.0,
+		Share:      0,
+	}
+
+	// Create a new member
+	err := testBu.RelationManager().AddMembers([]*bursary.MemberEntry{
+		me,
+	}, "")
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	// Change path
+	err = testBu.RelationManager().ChangePath(me.Id, []string{"test1", "test2"})
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	// Check path
+	paths, err := testBu.RelationManager().GetPath(me.Id)
+	if !assert.Nil(t, err) {
+		return
+	}
+
+	assert.Equal(t, "test1", paths[0])
+	assert.Equal(t, "test2", paths[1])
+}
+
 func Test_RelationManager_GetUpstreams(t *testing.T) {
 
 	defer uninit()

@@ -105,7 +105,11 @@ func (rm *RelationManager) GetPath(mid string) ([]string, error) {
 }
 
 func (rm *RelationManager) ChangePath(mid string, newPath []string) error {
-	return nil
+
+	cmd := fmt.Sprintf(`UPDATE %s SET relation_path = $1 WHERE id = $2`, rm.tableName)
+	_, err := rm.db.Exec(cmd, pq.StringArray(newPath), mid)
+
+	return err
 }
 
 func (rm *RelationManager) GetMember(mid string) (*bursary.Member, error) {

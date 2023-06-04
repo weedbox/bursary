@@ -19,10 +19,12 @@ type MemberEntry struct {
 
 type RelationManager interface {
 	AddMembers(members []*MemberEntry, upstream string) error
-	GetMember(mid string) (*Member, error)
-	MoveMembers(mids []string, upstream string) error
+	ChangePath(mid string, newPath []string) error
 	DeleteMembers(mids []string) error
+	GetPath(mid string) ([]string, error)
+	GetMember(mid string) (*Member, error)
 	GetUpstreams(mid string) ([]*Member, error)
+	MoveMembers(mids []string, upstream string) error
 	ListMembers(cond *Condition) ([]*Member, error)
 	UpdateChannelRule(mid string, channel string, rule *Rule) error
 	RemoveChannelRule(mid string, channel string) error
