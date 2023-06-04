@@ -115,13 +115,17 @@ func (rm *RelationManager) GetMember(mid string) (*bursary.Member, error) {
 	}
 
 	cmd := fmt.Sprintf(`SELECT * FROM %s WHERE id = $1`, rm.tableName)
-	record := &MemberRecord{}
-	err := rm.db.Get(record, cmd, mid)
+	records := []MemberRecord{}
+	err := rm.db.Select(&records, cmd, mid)
 	if err != nil {
 		return nil, err
 	}
 
-	return record.ToMemberObject(), nil
+	if len(records) == 0 {
+		return nil, bursary.ErrMemberNotFound
+	}
+
+	return records[0].ToMemberObject(), nil
 }
 
 func (rm *RelationManager) AddMembers(members []*bursary.MemberEntry, upstream string) error {
@@ -193,7 +197,11 @@ func (rm *RelationManager) MoveMembers(mids []string, upstream string) error {
 }
 
 func (rm *RelationManager) DeleteMembers(mids []string) error {
-	return nil
+
+	cmd := fmt.Sprintf(`DELETE FROM %s WHERE id = ANY ($1)`, rm.tableName)
+	_, err := rm.db.Exec(cmd, pq.Array(mids))
+
+	return err
 }
 
 func (rm *RelationManager) GetUpstreams(mid string) ([]*bursary.Member, error) {
