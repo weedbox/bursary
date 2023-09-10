@@ -6,6 +6,6 @@ type Rule struct {
 }
 
 var DefaultRule = Rule{
-	Commission: 0,   // No commissions for returning
-	Share:      1.0, // Take entire rewards
+	Commission: 0.0, // No commissions for returning
+	Share:      0.0, // just pass trough
 }

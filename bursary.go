@@ -115,7 +115,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 	amount := t.Amount
 	fee := t.Fee
 
-	// Find out the member
+	// Find out the edge member
 	m, err := b.rm.GetMember(t.MemberId)
 	if err != nil {
 		return nil, err
@@ -148,21 +148,27 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 	entries = append(entries, le)
 
 	fee -= le.Commissions
+	commissionShare := r.Commission
 
-	// Calculating sharing and commissions by levels
+	// Getting all levels from edge to root
 	levels, err := b.GetLevels(t.MemberId)
 	if err != nil {
 		return nil, err
 	}
 
-	// Initializing sharing
-	cormissionShare := r.Commission
-
-	prevRule := r
+	// Calculating sharing and commissions by levels
+	downstreamRule := r
 	for i, l := range levels {
 
 		// Getting default rule
 		r := l.GetChannelRule(t.Channel)
+		if r == nil {
+			// Using pervious rule if it doesn't exist
+			r = &Rule{
+				Commission: downstreamRule.Commission,
+				Share:      0.0,
+			}
+		}
 
 		// Create a new ledger entry for calculating feedback for upstreams
 		le := &LedgerEntry{
@@ -178,11 +184,12 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 
 		if i != len(levels)-1 {
 
+			// Calculating commision shares (take off previous commission shares)
 			//Note: Avoid precision problem
-			cormissionShare = ((r.Commission * 100) - (cormissionShare * 100)) * 0.01
+			commissionShare = ((r.Commission * 100) - (commissionShare * 100)) * 0.01
 
-			// Calculating amount
-			rawAmount := float64(t.Amount) * prevRule.Share
+			// Calculating amount based on the set ratio
+			rawAmount := float64(t.Amount) * downstreamRule.Share
 			if t.Amount < 0 {
 				le.Amount = int64(math.Floor(rawAmount))
 			} else {
@@ -190,7 +197,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 			}
 
 			// Calculating cormissions
-			le.Commissions = int64(math.Floor(float64(t.Fee) * cormissionShare))
+			le.Commissions = int64(math.Floor(float64(t.Fee) * commissionShare))
 			le.Total = le.Amount + le.Commissions
 
 			amount -= le.Amount
@@ -205,7 +212,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 
 		entries = append(entries, le)
 
-		prevRule = r
+		downstreamRule = r
 	}
 
 	return entries, nil
