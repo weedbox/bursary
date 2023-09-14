@@ -27,7 +27,7 @@ func Test_AddMembers(t *testing.T) {
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
-					Share:      0.2,
+					Share:      1.0,
 				},
 			},
 		},
@@ -46,7 +46,7 @@ func Test_AddMembers(t *testing.T) {
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
-					Share:      0.3,
+					Share:      0.8,
 				},
 			},
 		},
@@ -88,7 +88,7 @@ func Test_CalculateRewards(t *testing.T) {
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
-					Share:      0,
+					Share:      1.0,
 				},
 			},
 		},
@@ -97,7 +97,7 @@ func Test_CalculateRewards(t *testing.T) {
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
-					Share:      0.7,
+					Share:      0.8,
 				},
 			},
 		},
@@ -142,26 +142,312 @@ func Test_CalculateRewards(t *testing.T) {
 	ans := []map[string]int64{
 		// level 1
 		map[string]int64{
-			"commission": 15,
-			"income":     700,
+			"commission":    15,
+			"gain":          200,
+			"contributions": 0, // 200 - 200
 		},
 		// level 2
 		map[string]int64{
-			"commission": 10,
-			"income":     300,
+			"commission":    10,
+			"gain":          500,
+			"contributions": 200, // 700 - 500
 		},
 		// level 3
 		map[string]int64{
-			"commission": 25,
-			"income":     1000,
+			"commission":    25,
+			"gain":          300,
+			"contributions": 700, // 1000 - 300
 		},
 	}
 
 	for i, entry := range entries {
 		a := ans[len(ans)-i-1]
 		assert.Equal(t, a["commission"], entry.Commissions)
-		assert.Equal(t, a["income"], entry.Amount)
-		assert.Equal(t, a["income"]+a["commission"], entry.Total)
+		assert.Equal(t, a["gain"], entry.Gain)
+		assert.Equal(t, a["contributions"], entry.Contributions)
+		assert.Equal(t, a["gain"]+a["commission"], entry.Total)
+	}
+}
+
+func Test_CalculateRewards_Aliquant(t *testing.T) {
+
+	bu := NewBursary()
+	defer bu.Close()
+
+	levels := []*MemberEntry{
+		&MemberEntry{
+			Id: genTestId(),
+			ChannelRules: map[string]*Rule{
+				"default": &Rule{
+					Commission: 1.0,
+					Share:      1.0,
+				},
+			},
+		},
+		&MemberEntry{
+			Id: genTestId(),
+			ChannelRules: map[string]*Rule{
+				"default": &Rule{
+					Commission: 0.7,
+					Share:      0.6,
+				},
+			},
+		},
+		&MemberEntry{
+			Id: genTestId(),
+			ChannelRules: map[string]*Rule{
+				"default": &Rule{
+					Commission: 0.5,
+					Share:      0.3,
+				},
+			},
+		},
+	}
+
+	prevLevel := ""
+	for _, l := range levels {
+		err := bu.RelationManager().AddMembers([]*MemberEntry{
+			l,
+		}, prevLevel)
+		assert.Nil(t, err)
+
+		m, err := bu.RelationManager().GetMember(l.Id)
+		assert.Nil(t, err)
+		assert.Equal(t, l.Id, m.Id)
+
+		prevLevel = l.Id
+	}
+
+	// Preparing a new ticket
+	ticket := NewTicket()
+	ticket.Channel = "default"
+	ticket.MemberId = levels[2].Id
+	ticket.Amount = 999
+	ticket.Fee = 50
+	ticket.Total = 1050
+
+	// Calculate rewards
+	entries, err := bu.CalculateRewards(ticket)
+	assert.Nil(t, err)
+
+	// Answer
+	ans := []map[string]int64{
+		// level 1
+		map[string]int64{
+			"commission": 15,
+			"gain":       401,
+		},
+		// level 2
+		map[string]int64{
+			"commission": 10,
+			"gain":       299, // 299.7
+		},
+		// level 3
+		map[string]int64{
+			"commission": 25,
+			"gain":       299, // 299.7
+		},
+	}
+
+	for i, entry := range entries {
+		a := ans[len(ans)-i-1]
+		assert.Equal(t, a["commission"], entry.Commissions)
+		assert.Equal(t, a["gain"], entry.Gain)
+		assert.Equal(t, a["gain"]+a["commission"], entry.Total)
+	}
+}
+
+func Test_CalculateRewards_Negative(t *testing.T) {
+
+	bu := NewBursary()
+	defer bu.Close()
+
+	levels := []*MemberEntry{
+		&MemberEntry{
+			Id: genTestId(),
+			ChannelRules: map[string]*Rule{
+				"default": &Rule{
+					Commission: 1.0,
+					Share:      1.0,
+				},
+			},
+		},
+		&MemberEntry{
+			Id: genTestId(),
+			ChannelRules: map[string]*Rule{
+				"default": &Rule{
+					Commission: 0.7,
+					Share:      0.6,
+				},
+			},
+		},
+		&MemberEntry{
+			Id: genTestId(),
+			ChannelRules: map[string]*Rule{
+				"default": &Rule{
+					Commission: 0.5,
+					Share:      0.3,
+				},
+			},
+		},
+	}
+
+	prevLevel := ""
+	for _, l := range levels {
+		err := bu.RelationManager().AddMembers([]*MemberEntry{
+			l,
+		}, prevLevel)
+		assert.Nil(t, err)
+
+		m, err := bu.RelationManager().GetMember(l.Id)
+		assert.Nil(t, err)
+		assert.Equal(t, l.Id, m.Id)
+
+		prevLevel = l.Id
+	}
+
+	// Preparing a new ticket
+	ticket := NewTicket()
+	ticket.Channel = "default"
+	ticket.MemberId = levels[2].Id
+	ticket.Amount = -999
+	ticket.Fee = 50
+
+	// Calculate rewards
+	entries, err := bu.CalculateRewards(ticket)
+	assert.Nil(t, err)
+
+	// Answer
+	ans := []map[string]int64{
+		// level 1
+		map[string]int64{
+			"commission":    15,
+			"gain":          -399,
+			"contributions": 0, // -399 + 399
+		},
+		// level 2
+		map[string]int64{
+			"commission":    10,
+			"gain":          -300, // -299.7
+			"contributions": -399, // -699 + 300
+		},
+		// level 3
+		map[string]int64{
+			"commission":    25,
+			"gain":          -300, // -299.7
+			"contributions": -699, // -999 + 300
+		},
+	}
+
+	for i, entry := range entries {
+		a := ans[len(ans)-i-1]
+		assert.Equal(t, a["commission"], entry.Commissions)
+		assert.Equal(t, a["gain"], entry.Gain)
+		assert.Equal(t, a["contributions"], entry.Contributions)
+		assert.Equal(t, a["gain"]+a["commission"], entry.Total)
+	}
+}
+
+func Test_CalculateRewards_ReturnShare(t *testing.T) {
+
+	bu := NewBursary()
+	defer bu.Close()
+
+	levels := []*MemberEntry{
+		&MemberEntry{
+			Id: genTestId(),
+			ChannelRules: map[string]*Rule{
+				"default": &Rule{
+					Commission: 1.0,
+					Share:      1.0,
+				},
+			},
+		},
+		&MemberEntry{
+			Id: genTestId(),
+			ChannelRules: map[string]*Rule{
+				"default": &Rule{
+					Commission: 0.7,
+					Share:      0.9,
+				},
+			},
+		},
+		&MemberEntry{
+			Id: genTestId(),
+			ChannelRules: map[string]*Rule{
+				"default": &Rule{
+					Commission: 0.7,
+					Share:      0.8,
+				},
+			},
+		},
+		&MemberEntry{
+			Id: genTestId(),
+			ChannelRules: map[string]*Rule{
+				"default": &Rule{
+					Commission:    0.5,
+					Share:         0.3,
+					ReturnedShare: 0.4, // upstream should keep 10% only
+				},
+			},
+		},
+	}
+
+	prevLevel := ""
+	for _, l := range levels {
+		err := bu.RelationManager().AddMembers([]*MemberEntry{
+			l,
+		}, prevLevel)
+		assert.Nil(t, err)
+
+		m, err := bu.RelationManager().GetMember(l.Id)
+		assert.Nil(t, err)
+		assert.Equal(t, l.Id, m.Id)
+
+		prevLevel = l.Id
+	}
+
+	// Preparing a new ticket
+	ticket := NewTicket()
+	ticket.Channel = "default"
+	ticket.MemberId = levels[len(levels)-1].Id
+	ticket.Amount = 1000
+	ticket.Fee = 50
+	ticket.Total = 1050
+
+	// Calculate rewards
+	entries, err := bu.CalculateRewards(ticket)
+	assert.Nil(t, err)
+
+	// Answer
+	ans := []map[string]int64{
+		// level 1
+		map[string]int64{
+			"commission": 15,
+			"gain":       100,
+		},
+		// level 2
+		map[string]int64{
+			"commission": 0,
+			"gain":       500,
+		},
+		// level 3
+		map[string]int64{
+			"commission": 10,
+			"gain":       100,
+		},
+		// level 4
+		map[string]int64{
+			"commission": 25,
+			"gain":       300,
+		},
+	}
+
+	for i, entry := range entries {
+		a := ans[len(ans)-i-1]
+		assert.Equal(t, a["commission"], entry.Commissions)
+		assert.Equal(t, a["gain"], entry.Gain)
+		assert.Equal(t, a["gain"]+a["commission"], entry.Total)
 	}
 }
 
@@ -180,7 +466,7 @@ func Test_WriteTicket(t *testing.T) {
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
-					Share:      0,
+					Share:      1.0,
 				},
 			},
 		},
@@ -189,7 +475,7 @@ func Test_WriteTicket(t *testing.T) {
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
-					Share:      0.7,
+					Share:      0.9,
 				},
 			},
 		},
@@ -235,17 +521,17 @@ func Test_WriteTicket(t *testing.T) {
 		// level 1
 		map[string]int64{
 			"commission": 15,
-			"income":     700,
+			"gain":       100,
 		},
 		// level 2
 		map[string]int64{
 			"commission": 10,
-			"income":     300,
+			"gain":       600,
 		},
 		// level 3
 		map[string]int64{
 			"commission": 25,
-			"income":     1000,
+			"gain":       300,
 		},
 	}
 
@@ -259,8 +545,8 @@ func Test_WriteTicket(t *testing.T) {
 
 		a := ans[i]
 		assert.Equal(t, a["commission"], records[0].Commissions)
-		assert.Equal(t, a["income"], records[0].Amount)
-		assert.Equal(t, a["income"]+a["commission"], records[0].Total)
+		assert.Equal(t, a["gain"], records[0].Gain)
+		assert.Equal(t, a["gain"]+a["commission"], records[0].Total)
 	}
 }
 
@@ -279,7 +565,7 @@ func Test_WriteEntries(t *testing.T) {
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
-					Share:      0,
+					Share:      1.0,
 				},
 			},
 		},
@@ -288,7 +574,7 @@ func Test_WriteEntries(t *testing.T) {
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
-					Share:      0.7,
+					Share:      1.0,
 				},
 			},
 		},
@@ -334,17 +620,17 @@ func Test_WriteEntries(t *testing.T) {
 		// level 1
 		map[string]int64{
 			"commission": 15,
-			"income":     700,
+			"gain":       0,
 		},
 		// level 2
 		map[string]int64{
 			"commission": 10,
-			"income":     300,
+			"gain":       700,
 		},
 		// level 3
 		map[string]int64{
 			"commission": 25,
-			"income":     1000,
+			"gain":       300,
 		},
 	}
 
@@ -371,8 +657,8 @@ func Test_WriteEntries(t *testing.T) {
 		// Check rewards
 		a := ans[i]
 		assert.Equal(t, a["commission"], records[0].Commissions)
-		assert.Equal(t, a["income"], records[0].Amount)
-		assert.Equal(t, a["income"]+a["commission"], records[0].Total)
+		assert.Equal(t, a["gain"], records[0].Gain)
+		assert.Equal(t, a["gain"]+a["commission"], records[0].Total)
 
 		// Check fields
 		assert.Equal(t, ticket.Id, records[0].PrimaryId)

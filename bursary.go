@@ -111,10 +111,6 @@ func (b *bursary) GetLevels(memberId string) ([]*Member, error) {
 
 func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 
-	// Initial rewards
-	amount := t.Amount
-	fee := t.Fee
-
 	// Find out the edge member
 	m, err := b.rm.GetMember(t.MemberId)
 	if err != nil {
@@ -130,25 +126,37 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 
 	// Create a new ledger entry for Calculating rewards for ticket owner
 	le := &LedgerEntry{
-		Id:          t.Id,
-		Channel:     t.Channel,
-		MemberId:    t.MemberId,
-		Amount:      amount,
-		Commissions: int64(math.Floor(float64(fee) * r.Commission)),
-		Desc:        t.Desc,
-		Info:        t.Info,
-		IsPrimary:   true,
-		PrimaryId:   t.Id,
-		CreatedAt:   t.CreatedAt,
+		Id:              t.Id,
+		Channel:         t.Channel,
+		MemberId:        t.MemberId,
+		Contributor:     t.MemberId, // self
+		Expense:         t.Expense,
+		Income:          t.Income,
+		Fee:             t.Fee,
+		Amount:          t.Amount,
+		Share:           r.Share,
+		ReturnedShare:   0.0,
+		CommissionShare: r.Commission,
+		Desc:            t.Desc,
+		Info:            t.Info,
+		IsPrimary:       true,
+		PrimaryId:       t.Id,
+		CreatedAt:       t.CreatedAt,
 	}
 
-	le.Total = le.Amount + le.Commissions
+	// Calculate gain and commissions
+	le.Commissions = int64(math.Floor(float64(t.Fee) * r.Commission))
+	le.Gain = int64(math.Floor(float64(t.Amount) * r.Share))
+	le.Contributions = t.Amount - le.Gain
 
+	// Deduct the delivered parts
+	fee := t.Fee - le.Commissions
+
+	le.Total = le.Gain + le.Commissions
+
+	// Add entry of ticket owner to list
 	entries := make([]*LedgerEntry, 0)
 	entries = append(entries, le)
-
-	fee -= le.Commissions
-	commissionShare := r.Commission
 
 	// Getting all levels from edge to root
 	levels, err := b.GetLevels(t.MemberId)
@@ -157,6 +165,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 	}
 
 	// Calculating sharing and commissions by levels
+	downstreamEntry := le
 	downstreamRule := r
 	for i, l := range levels {
 
@@ -165,53 +174,57 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 		if r == nil {
 			// Using pervious rule if it doesn't exist
 			r = &Rule{
-				Commission: downstreamRule.Commission,
+				Commission: downstreamEntry.CommissionShare,
 				Share:      0.0,
 			}
 		}
 
 		// Create a new ledger entry for calculating feedback for upstreams
 		le := &LedgerEntry{
-			Id:        uuid.New().String(),
-			Channel:   t.Channel,
-			MemberId:  l.Id,
-			Desc:      t.Desc,
-			Info:      t.Info,
-			IsPrimary: false,
-			PrimaryId: le.PrimaryId,
-			CreatedAt: t.CreatedAt,
+			Id:              uuid.New().String(),
+			Channel:         t.Channel,
+			MemberId:        l.Id,
+			Contributor:     downstreamEntry.Id,
+			Expense:         t.Expense,
+			Income:          t.Income,
+			Amount:          t.Amount,
+			Share:           r.Share,
+			ReturnedShare:   0.0,
+			CommissionShare: r.Commission,
+			Desc:            t.Desc,
+			Info:            t.Info,
+			IsPrimary:       false,
+			PrimaryId:       le.PrimaryId,
+			CreatedAt:       t.CreatedAt,
 		}
 
 		if i != len(levels)-1 {
 
-			// Calculating commision shares (take off previous commission shares)
-			//Note: Avoid precision problem
-			commissionShare = ((r.Commission * 100) - (commissionShare * 100)) * 0.01
+			// Calculate gain and commissions shares
+			commissionShare := (r.Commission*100 - downstreamEntry.CommissionShare*100) / 100
+			share := (r.Share*100 + downstreamEntry.ReturnedShare*100 - downstreamEntry.Share*100 - downstreamRule.ReturnedShare*100) / 100
 
-			// Calculating amount based on the set ratio
-			rawAmount := float64(t.Amount) * downstreamRule.Share
-			if t.Amount < 0 {
-				le.Amount = int64(math.Floor(rawAmount))
-			} else {
-				le.Amount = int64(math.Ceil(rawAmount))
-			}
+			// Return share to upstream
+			le.ReturnedShare = downstreamRule.ReturnedShare
 
-			// Calculating cormissions
+			// Calculate gain and commissions
 			le.Commissions = int64(math.Floor(float64(t.Fee) * commissionShare))
-			le.Total = le.Amount + le.Commissions
+			le.Gain = int64(math.Floor(float64(t.Amount) * share))
 
-			amount -= le.Amount
 			fee -= le.Commissions
 
 		} else {
-			// The top-level agent takes the rest of amount and cormissions
-			le.Amount = amount
+			// The top-level agent takes the rest of contributions and cormissions
+			le.Gain = downstreamEntry.Contributions
 			le.Commissions = fee
-			le.Total = le.Amount + le.Commissions
 		}
+
+		le.Contributions = downstreamEntry.Contributions - le.Gain
+		le.Total = le.Gain + le.Commissions
 
 		entries = append(entries, le)
 
+		downstreamEntry = le
 		downstreamRule = r
 	}
 
