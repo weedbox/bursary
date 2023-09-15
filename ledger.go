@@ -14,7 +14,7 @@ type LedgerEntry struct {
 	Share           float64                `json:"share"`
 	ReturnedShare   float64                `json:"returned_share"`
 	CommissionShare float64                `json:"commission_share"`
-	Gain            int64                  `json:"profit"`      // amount * (share + returned share by downstream)
+	Gain            int64                  `json:"gain"`        // amount * (share + returned share by downstream)
 	Commissions     int64                  `json:"commissions"` // fee * commission share
 	Contributions   int64                  `json:"contributions"`
 	Total           int64                  `json:"total"` // profit + commissions
