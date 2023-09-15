@@ -112,7 +112,7 @@ func (b *bursary) GetLevels(memberId string) ([]*Member, error) {
 func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 
 	// Find out the edge member
-	m, err := b.rm.GetMember(t.MemberId)
+	m, err := b.rm.GetMember(t.MemberID)
 	if err != nil {
 		return nil, err
 	}
@@ -126,10 +126,10 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 
 	// Create a new ledger entry for Calculating rewards for ticket owner
 	le := &LedgerEntry{
-		Id:              t.Id,
+		ID:              t.ID,
 		Channel:         t.Channel,
-		MemberId:        t.MemberId,
-		Contributor:     t.MemberId, // self
+		MemberID:        t.MemberID,
+		Contributor:     t.MemberID, // self
 		Expense:         t.Expense,
 		Income:          t.Income,
 		Fee:             t.Fee,
@@ -140,7 +140,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 		Desc:            t.Desc,
 		Info:            t.Info,
 		IsPrimary:       true,
-		PrimaryId:       t.Id,
+		PrimaryID:       t.ID,
 		CreatedAt:       t.CreatedAt,
 	}
 
@@ -159,7 +159,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 	entries = append(entries, le)
 
 	// Getting all levels from edge to root
-	levels, err := b.GetLevels(t.MemberId)
+	levels, err := b.GetLevels(t.MemberID)
 	if err != nil {
 		return nil, err
 	}
@@ -181,10 +181,10 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 
 		// Create a new ledger entry for calculating feedback for upstreams
 		le := &LedgerEntry{
-			Id:              uuid.New().String(),
+			ID:              uuid.New().String(),
 			Channel:         t.Channel,
-			MemberId:        l.Id,
-			Contributor:     downstreamEntry.Id,
+			MemberID:        l.ID,
+			Contributor:     downstreamEntry.ID,
 			Expense:         t.Expense,
 			Income:          t.Income,
 			Amount:          t.Amount,
@@ -194,7 +194,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 			Desc:            t.Desc,
 			Info:            t.Info,
 			IsPrimary:       false,
-			PrimaryId:       le.PrimaryId,
+			PrimaryID:       le.PrimaryID,
 			CreatedAt:       t.CreatedAt,
 		}
 

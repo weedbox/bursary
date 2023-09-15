@@ -124,8 +124,8 @@ func (rm *RelationManagerPostgres) ChangePathByUpstream(upstream string, newPath
 			return err
 		}
 
-		curPath := append(newPath, record.Id)
-		err = rm.ChangePathByUpstream(record.Id, curPath)
+		curPath := append(newPath, record.ID)
+		err = rm.ChangePathByUpstream(record.ID, curPath)
 		if err != nil {
 			return err
 		}
@@ -194,7 +194,7 @@ func (rm *RelationManagerPostgres) AddMembers(members []*bursary.MemberEntry, up
 	for _, me := range members {
 
 		m := &MemberRecord{
-			Id:           me.Id,
+			ID:           me.ID,
 			ChannelRules: make(map[string]*Rule),
 			RelationPath: pq.StringArray(rp),
 			Upstream:     upstream,

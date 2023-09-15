@@ -63,13 +63,13 @@ func (rm *relationManagerMemory) AddMembers(members []*MemberEntry, upstream str
 	for _, me := range members {
 
 		m := &Member{
-			Id:           me.Id,
+			ID:           me.ID,
 			ChannelRules: me.ChannelRules,
 			RelationPath: rp,
 			Upstream:     upstream,
 		}
 
-		rm.members[m.Id] = m
+		rm.members[m.ID] = m
 	}
 
 	return nil
@@ -97,8 +97,8 @@ func (rm *relationManagerMemory) MoveMembers(mids []string, upstream string) err
 
 		// find and update downstreams
 		for _, ds := range rm.members {
-			if ds.Upstream == m.Id {
-				rm.ChangePath(ds.Id, curPath)
+			if ds.Upstream == m.ID {
+				rm.ChangePath(ds.ID, curPath)
 			}
 		}
 	}
@@ -125,9 +125,9 @@ func (rm *relationManagerMemory) GetUpstreams(mid string) ([]*Member, error) {
 	}
 
 	// Getting all members according to relation path
-	for _, usId := range m.RelationPath {
+	for _, usID := range m.RelationPath {
 
-		usm, err := rm.GetMember(usId)
+		usm, err := rm.GetMember(usID)
 		if err != nil {
 			return nil, err
 		}

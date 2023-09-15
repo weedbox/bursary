@@ -13,7 +13,7 @@ func Test_RelationManager_ListMembers(t *testing.T) {
 
 	levels := []*MemberEntry{
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
@@ -22,7 +22,7 @@ func Test_RelationManager_ListMembers(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
@@ -31,7 +31,7 @@ func Test_RelationManager_ListMembers(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.5,
@@ -48,11 +48,11 @@ func Test_RelationManager_ListMembers(t *testing.T) {
 		}, prevLevel)
 		assert.Nil(t, err)
 
-		m, err := bu.RelationManager().GetMember(l.Id)
+		m, err := bu.RelationManager().GetMember(l.ID)
 		assert.Nil(t, err)
-		assert.Equal(t, l.Id, m.Id)
+		assert.Equal(t, l.ID, m.ID)
 
-		prevLevel = l.Id
+		prevLevel = l.ID
 	}
 
 	members, err := bu.RelationManager().ListMembers("", &Condition{
@@ -77,7 +77,7 @@ func Test_RelationManager_RemoveChannel(t *testing.T) {
 
 	levels := []*MemberEntry{
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
@@ -86,7 +86,7 @@ func Test_RelationManager_RemoveChannel(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
@@ -95,7 +95,7 @@ func Test_RelationManager_RemoveChannel(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.5,
@@ -112,11 +112,11 @@ func Test_RelationManager_RemoveChannel(t *testing.T) {
 		}, prevLevel)
 		assert.Nil(t, err)
 
-		m, err := bu.RelationManager().GetMember(l.Id)
+		m, err := bu.RelationManager().GetMember(l.ID)
 		assert.Nil(t, err)
-		assert.Equal(t, l.Id, m.Id)
+		assert.Equal(t, l.ID, m.ID)
 
-		prevLevel = l.Id
+		prevLevel = l.ID
 	}
 
 	err := bu.RelationManager().RemoveChannel("default")

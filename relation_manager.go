@@ -13,8 +13,8 @@ var (
 )
 
 type MemberEntry struct {
-	Id           string           `json:"id"`
-	ChannelRules map[string]*Rule `json:"channelRules"`
+	ID           string           `json:"id"`
+	ChannelRules map[string]*Rule `json:"channel_rules"`
 }
 
 type RelationManager interface {
@@ -34,7 +34,7 @@ type RelationManager interface {
 
 func NewMemberEntry() *MemberEntry {
 	return &MemberEntry{
-		Id:           uuid.New().String(),
+		ID:           uuid.New().String(),
 		ChannelRules: make(map[string]*Rule),
 	}
 }

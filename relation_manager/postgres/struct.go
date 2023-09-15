@@ -39,7 +39,7 @@ func (cr *ChannelRules) Scan(src interface{}) error {
 }
 
 type MemberRecord struct {
-	Id           string         `db:"id"`
+	ID           string         `db:"id"`
 	ChannelRules ChannelRules   `db:"channel_rules"`
 	RelationPath pq.StringArray `db:"relation_path"`
 	Upstream     string         `db:"upstream"`

@@ -1,9 +1,9 @@
 package bursary
 
 type Member struct {
-	Id           string           `json:"id"`
-	ChannelRules map[string]*Rule `json:"channelRules"`
-	RelationPath []string         `json:"relationPath"`
+	ID           string           `json:"id"`
+	ChannelRules map[string]*Rule `json:"channel_rules"`
+	RelationPath []string         `json:"relation_path"`
 	Upstream     string           `json:"upstream"`
 }
 

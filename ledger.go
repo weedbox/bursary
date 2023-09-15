@@ -3,9 +3,9 @@ package bursary
 import "time"
 
 type LedgerEntry struct {
-	Id              string                 `json:"id"`
+	ID              string                 `json:"id"`
 	Channel         string                 `json:"channel"`
-	MemberId        string                 `json:"member_id"`
+	MemberID        string                 `json:"member_id"`
 	Contributor     string                 `json:"contributor"`
 	Expense         int64                  `json:"expense"`
 	Income          int64                  `json:"income"`
@@ -20,12 +20,12 @@ type LedgerEntry struct {
 	Total           int64                  `json:"total"` // profit + commissions
 	Desc            string                 `json:"desc"`
 	Info            map[string]interface{} `json:"info"`
-	PrimaryId       string                 `json:"primary_id"`
+	PrimaryID       string                 `json:"primary_id"`
 	IsPrimary       bool                   `json:"is_primary"`
-	CreatedAt       time.Time              `json:"createdAt"`
+	CreatedAt       time.Time              `json:"created_at"`
 }
 
 type Ledger interface {
 	WriteRecords(entries []*LedgerEntry) error
-	ReadRecordsByMemberId(memberId string, cond *Condition) ([]*LedgerEntry, error)
+	ReadRecordsByMemberID(memberID string, cond *Condition) ([]*LedgerEntry, error)
 }

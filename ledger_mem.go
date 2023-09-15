@@ -15,7 +15,7 @@ func (l *ledgerMemory) WriteRecords(entries []*LedgerEntry) error {
 	return nil
 }
 
-func (l *ledgerMemory) ReadRecordsByMemberId(memberId string, cond *Condition) ([]*LedgerEntry, error) {
+func (l *ledgerMemory) ReadRecordsByMemberID(memberID string, cond *Condition) ([]*LedgerEntry, error) {
 
 	if cond.Page < 1 {
 		cond.Page = 1
@@ -40,7 +40,7 @@ func (l *ledgerMemory) ReadRecordsByMemberId(memberId string, cond *Condition) (
 			break
 		}
 
-		if t.MemberId != memberId {
+		if t.MemberID != memberID {
 			continue
 		}
 

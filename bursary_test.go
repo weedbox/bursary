@@ -7,11 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testIdCounter = 0
+var testIDCounter = 0
 
-func genTestId() string {
-	testIdCounter++
-	return fmt.Sprintf("Test_%d", testIdCounter)
+func genTestID() string {
+	testIDCounter++
+	return fmt.Sprintf("Test_%d", testIDCounter)
 }
 
 func Test_AddMembers(t *testing.T) {
@@ -20,10 +20,10 @@ func Test_AddMembers(t *testing.T) {
 	defer bu.Close()
 
 	// Add root member
-	rootId := genTestId()
+	rootID := genTestID()
 	err := bu.RelationManager().AddMembers([]*MemberEntry{
 		&MemberEntry{
-			Id: rootId,
+			ID: rootID,
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
@@ -34,15 +34,15 @@ func Test_AddMembers(t *testing.T) {
 	}, "")
 	assert.Nil(t, err)
 
-	m, err := bu.RelationManager().GetMember(rootId)
+	m, err := bu.RelationManager().GetMember(rootID)
 	assert.Nil(t, err)
-	assert.Equal(t, rootId, m.Id)
+	assert.Equal(t, rootID, m.ID)
 
 	// second level
-	secondId := genTestId()
+	secondID := genTestID()
 	err = bu.RelationManager().AddMembers([]*MemberEntry{
 		&MemberEntry{
-			Id: secondId,
+			ID: secondID,
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
@@ -50,18 +50,18 @@ func Test_AddMembers(t *testing.T) {
 				},
 			},
 		},
-	}, rootId)
+	}, rootID)
 	assert.Nil(t, err)
 
-	m, err = bu.RelationManager().GetMember(secondId)
+	m, err = bu.RelationManager().GetMember(secondID)
 	assert.Nil(t, err)
-	assert.Equal(t, secondId, m.Id)
+	assert.Equal(t, secondID, m.ID)
 
 	// third level
-	thirdId := genTestId()
+	thirdID := genTestID()
 	err = bu.RelationManager().AddMembers([]*MemberEntry{
 		&MemberEntry{
-			Id: thirdId,
+			ID: thirdID,
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.5,
@@ -69,12 +69,12 @@ func Test_AddMembers(t *testing.T) {
 				},
 			},
 		},
-	}, secondId)
+	}, secondID)
 	assert.Nil(t, err)
 
-	m, err = bu.RelationManager().GetMember(thirdId)
+	m, err = bu.RelationManager().GetMember(thirdID)
 	assert.Nil(t, err)
-	assert.Equal(t, thirdId, m.Id)
+	assert.Equal(t, thirdID, m.ID)
 }
 
 func Test_CalculateRewards(t *testing.T) {
@@ -84,7 +84,7 @@ func Test_CalculateRewards(t *testing.T) {
 
 	levels := []*MemberEntry{
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
@@ -93,7 +93,7 @@ func Test_CalculateRewards(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
@@ -102,7 +102,7 @@ func Test_CalculateRewards(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.5,
@@ -119,17 +119,17 @@ func Test_CalculateRewards(t *testing.T) {
 		}, prevLevel)
 		assert.Nil(t, err)
 
-		m, err := bu.RelationManager().GetMember(l.Id)
+		m, err := bu.RelationManager().GetMember(l.ID)
 		assert.Nil(t, err)
-		assert.Equal(t, l.Id, m.Id)
+		assert.Equal(t, l.ID, m.ID)
 
-		prevLevel = l.Id
+		prevLevel = l.ID
 	}
 
 	// Preparing a new ticket
 	ticket := NewTicket()
 	ticket.Channel = "default"
-	ticket.MemberId = levels[2].Id
+	ticket.MemberID = levels[2].ID
 	ticket.Amount = 1000
 	ticket.Fee = 50
 	ticket.Total = 1050
@@ -176,7 +176,7 @@ func Test_CalculateRewards_Aliquant(t *testing.T) {
 
 	levels := []*MemberEntry{
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
@@ -185,7 +185,7 @@ func Test_CalculateRewards_Aliquant(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
@@ -194,7 +194,7 @@ func Test_CalculateRewards_Aliquant(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.5,
@@ -211,17 +211,17 @@ func Test_CalculateRewards_Aliquant(t *testing.T) {
 		}, prevLevel)
 		assert.Nil(t, err)
 
-		m, err := bu.RelationManager().GetMember(l.Id)
+		m, err := bu.RelationManager().GetMember(l.ID)
 		assert.Nil(t, err)
-		assert.Equal(t, l.Id, m.Id)
+		assert.Equal(t, l.ID, m.ID)
 
-		prevLevel = l.Id
+		prevLevel = l.ID
 	}
 
 	// Preparing a new ticket
 	ticket := NewTicket()
 	ticket.Channel = "default"
-	ticket.MemberId = levels[2].Id
+	ticket.MemberID = levels[2].ID
 	ticket.Amount = 999
 	ticket.Fee = 50
 	ticket.Total = 1050
@@ -264,7 +264,7 @@ func Test_CalculateRewards_Negative(t *testing.T) {
 
 	levels := []*MemberEntry{
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
@@ -273,7 +273,7 @@ func Test_CalculateRewards_Negative(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
@@ -282,7 +282,7 @@ func Test_CalculateRewards_Negative(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.5,
@@ -299,17 +299,17 @@ func Test_CalculateRewards_Negative(t *testing.T) {
 		}, prevLevel)
 		assert.Nil(t, err)
 
-		m, err := bu.RelationManager().GetMember(l.Id)
+		m, err := bu.RelationManager().GetMember(l.ID)
 		assert.Nil(t, err)
-		assert.Equal(t, l.Id, m.Id)
+		assert.Equal(t, l.ID, m.ID)
 
-		prevLevel = l.Id
+		prevLevel = l.ID
 	}
 
 	// Preparing a new ticket
 	ticket := NewTicket()
 	ticket.Channel = "default"
-	ticket.MemberId = levels[2].Id
+	ticket.MemberID = levels[2].ID
 	ticket.Amount = -999
 	ticket.Fee = 50
 
@@ -355,7 +355,7 @@ func Test_CalculateRewards_ReturnShare(t *testing.T) {
 
 	levels := []*MemberEntry{
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
@@ -364,7 +364,7 @@ func Test_CalculateRewards_ReturnShare(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
@@ -373,7 +373,7 @@ func Test_CalculateRewards_ReturnShare(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
@@ -382,7 +382,7 @@ func Test_CalculateRewards_ReturnShare(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission:    0.5,
@@ -400,17 +400,17 @@ func Test_CalculateRewards_ReturnShare(t *testing.T) {
 		}, prevLevel)
 		assert.Nil(t, err)
 
-		m, err := bu.RelationManager().GetMember(l.Id)
+		m, err := bu.RelationManager().GetMember(l.ID)
 		assert.Nil(t, err)
-		assert.Equal(t, l.Id, m.Id)
+		assert.Equal(t, l.ID, m.ID)
 
-		prevLevel = l.Id
+		prevLevel = l.ID
 	}
 
 	// Preparing a new ticket
 	ticket := NewTicket()
 	ticket.Channel = "default"
-	ticket.MemberId = levels[len(levels)-1].Id
+	ticket.MemberID = levels[len(levels)-1].ID
 	ticket.Amount = 1000
 	ticket.Fee = 50
 	ticket.Total = 1050
@@ -462,7 +462,7 @@ func Test_WriteTicket(t *testing.T) {
 
 	levels := []*MemberEntry{
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
@@ -471,7 +471,7 @@ func Test_WriteTicket(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
@@ -480,7 +480,7 @@ func Test_WriteTicket(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.5,
@@ -497,17 +497,17 @@ func Test_WriteTicket(t *testing.T) {
 		}, prevLevel)
 		assert.Nil(t, err)
 
-		m, err := bu.RelationManager().GetMember(l.Id)
+		m, err := bu.RelationManager().GetMember(l.ID)
 		assert.Nil(t, err)
-		assert.Equal(t, l.Id, m.Id)
+		assert.Equal(t, l.ID, m.ID)
 
-		prevLevel = l.Id
+		prevLevel = l.ID
 	}
 
 	// Preparing a new ticket
 	ticket := NewTicket()
 	ticket.Channel = "default"
-	ticket.MemberId = levels[2].Id
+	ticket.MemberID = levels[2].ID
 	ticket.Amount = 1000
 	ticket.Fee = 50
 	ticket.Total = 1050
@@ -537,7 +537,7 @@ func Test_WriteTicket(t *testing.T) {
 
 	// General ledger
 	for i, l := range levels {
-		records, err := bu.GeneralLedger().ReadRecordsByMemberId(l.Id, &Condition{
+		records, err := bu.GeneralLedger().ReadRecordsByMemberID(l.ID, &Condition{
 			Page:  1,
 			Limit: 10,
 		})
@@ -561,7 +561,7 @@ func Test_WriteEntries(t *testing.T) {
 
 	levels := []*MemberEntry{
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 1.0,
@@ -570,7 +570,7 @@ func Test_WriteEntries(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.7,
@@ -579,7 +579,7 @@ func Test_WriteEntries(t *testing.T) {
 			},
 		},
 		&MemberEntry{
-			Id: genTestId(),
+			ID: genTestID(),
 			ChannelRules: map[string]*Rule{
 				"default": &Rule{
 					Commission: 0.5,
@@ -596,17 +596,17 @@ func Test_WriteEntries(t *testing.T) {
 		}, prevLevel)
 		assert.Nil(t, err)
 
-		m, err := bu.RelationManager().GetMember(l.Id)
+		m, err := bu.RelationManager().GetMember(l.ID)
 		assert.Nil(t, err)
-		assert.Equal(t, l.Id, m.Id)
+		assert.Equal(t, l.ID, m.ID)
 
-		prevLevel = l.Id
+		prevLevel = l.ID
 	}
 
 	// Preparing a new ticket
 	ticket := NewTicket()
 	ticket.Channel = "default"
-	ticket.MemberId = levels[2].Id
+	ticket.MemberID = levels[2].ID
 	ticket.Amount = 1000
 	ticket.Fee = 50
 	ticket.Total = 1050
@@ -646,7 +646,7 @@ func Test_WriteEntries(t *testing.T) {
 			continue
 		}
 
-		records, err := sl.ReadRecordsByMemberId(l.Id, &Condition{
+		records, err := sl.ReadRecordsByMemberID(l.ID, &Condition{
 			Page:  1,
 			Limit: 10,
 		})
@@ -661,6 +661,6 @@ func Test_WriteEntries(t *testing.T) {
 		assert.Equal(t, a["gain"]+a["commission"], records[0].Total)
 
 		// Check fields
-		assert.Equal(t, ticket.Id, records[0].PrimaryId)
+		assert.Equal(t, ticket.ID, records[0].PrimaryID)
 	}
 }

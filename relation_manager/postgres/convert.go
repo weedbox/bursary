@@ -5,7 +5,7 @@ import "github.com/weedbox/bursary"
 func (mr *MemberRecord) ToMemberObject() *bursary.Member {
 
 	m := &bursary.Member{
-		Id:           mr.Id,
+		ID:           mr.ID,
 		ChannelRules: make(map[string]*bursary.Rule),
 		RelationPath: mr.RelationPath,
 		Upstream:     mr.Upstream,
