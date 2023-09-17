@@ -5,6 +5,7 @@ import "time"
 type LedgerEntry struct {
 	ID              string                 `json:"id"`
 	Channel         string                 `json:"channel"`
+	Upstream        string                 `json:"upstream"`
 	MemberID        string                 `json:"member_id"`
 	Contributor     string                 `json:"contributor"`
 	Expense         int64                  `json:"expense"`

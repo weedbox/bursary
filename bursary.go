@@ -169,6 +169,8 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 	downstreamRule := r
 	for i, l := range levels {
 
+		downstreamEntry.Upstream = l.ID
+
 		// Getting default rule
 		r := l.GetChannelRule(t.Channel)
 		if r == nil {

@@ -93,16 +93,16 @@ func Test_RelationManagerPostgres_AddMembers(t *testing.T) {
 			break
 		}
 
-		prevLevel = l.Id
+		prevLevel = l.ID
 	}
 
 	// Check members
 	for _, l := range levels {
 
 		// Check if member exists
-		m, err := testBu.RelationManager().GetMember(l.Id)
+		m, err := testBu.RelationManager().GetMember(l.ID)
 		if assert.Nil(t, err) {
-			assert.Equal(t, l.Id, m.Id)
+			assert.Equal(t, l.ID, m.ID)
 		}
 	}
 }
@@ -147,13 +147,13 @@ func Test_RelationManagerPostgres_DeleteMembers(t *testing.T) {
 			break
 		}
 
-		prevLevel = l.Id
+		prevLevel = l.ID
 	}
 
 	// Delete members
 	targetMembers := make([]string, 0)
 	for _, l := range levels {
-		targetMembers = append(targetMembers, l.Id)
+		targetMembers = append(targetMembers, l.ID)
 	}
 
 	err := testBu.RelationManager().DeleteMembers(targetMembers)
@@ -165,7 +165,7 @@ func Test_RelationManagerPostgres_DeleteMembers(t *testing.T) {
 	for _, l := range levels {
 
 		// Check if member exists
-		_, err := testBu.RelationManager().GetMember(l.Id)
+		_, err := testBu.RelationManager().GetMember(l.ID)
 		assert.Error(t, err, bursary.ErrMemberNotFound)
 	}
 }
@@ -252,13 +252,13 @@ func Test_RelationManagerPostgres_ChangePath(t *testing.T) {
 	}
 
 	// Change path
-	err = testBu.RelationManager().ChangePath(me.Id, []string{"test1", "test2"})
+	err = testBu.RelationManager().ChangePath(me.ID, []string{"test1", "test2"})
 	if !assert.Nil(t, err) {
 		return
 	}
 
 	// Check path
-	paths, err := testBu.RelationManager().GetPath(me.Id)
+	paths, err := testBu.RelationManager().GetPath(me.ID)
 	if !assert.Nil(t, err) {
 		return
 	}
@@ -307,27 +307,27 @@ func Test_RelationManagerPostgres_MoveMembers(t *testing.T) {
 			break
 		}
 
-		prevLevel = l.Id
+		prevLevel = l.ID
 	}
 
 	// Move members to root
-	err := testBu.RelationManager().MoveMembers([]string{levels[1].Id}, "")
+	err := testBu.RelationManager().MoveMembers([]string{levels[1].ID}, "")
 	if !assert.Nil(t, err) {
 		return
 	}
 
 	// Check path
-	m, err := testBu.RelationManager().GetMember(levels[1].Id)
+	m, err := testBu.RelationManager().GetMember(levels[1].ID)
 	assert.Nil(t, err)
 	assert.Equal(t, RootNode, m.Upstream)
 	assert.Len(t, m.RelationPath, 0)
 
 	// Check second level
-	m, err = testBu.RelationManager().GetMember(levels[2].Id)
+	m, err = testBu.RelationManager().GetMember(levels[2].ID)
 	assert.Nil(t, err)
-	assert.Equal(t, levels[1].Id, m.Upstream)
+	assert.Equal(t, levels[1].ID, m.Upstream)
 	assert.Len(t, m.RelationPath, 1)
-	assert.Equal(t, levels[1].Id, m.RelationPath[0])
+	assert.Equal(t, levels[1].ID, m.RelationPath[0])
 }
 
 func Test_RelationManagerPostgres_GetUpstreams(t *testing.T) {
@@ -370,18 +370,18 @@ func Test_RelationManagerPostgres_GetUpstreams(t *testing.T) {
 			break
 		}
 
-		prevLevel = l.Id
+		prevLevel = l.ID
 	}
 
 	// Check upstreams
-	members, err := testBu.RelationManager().GetUpstreams(levels[2].Id)
+	members, err := testBu.RelationManager().GetUpstreams(levels[2].ID)
 	if !assert.Nil(t, err) {
 		return
 	}
 
 	assert.Len(t, members, 2)
-	assert.Equal(t, members[0].Id, levels[0].Id)
-	assert.Equal(t, members[1].Id, levels[1].Id)
+	assert.Equal(t, members[0].ID, levels[0].ID)
+	assert.Equal(t, members[1].ID, levels[1].ID)
 }
 
 func Test_RelationManagerPostgres_UpdateChannelRule(t *testing.T) {
@@ -404,7 +404,7 @@ func Test_RelationManagerPostgres_UpdateChannelRule(t *testing.T) {
 	}
 
 	// Update rule
-	err = testBu.RelationManager().UpdateChannelRule(me.Id, "default", &bursary.Rule{
+	err = testBu.RelationManager().UpdateChannelRule(me.ID, "default", &bursary.Rule{
 		Commission: 0.5,
 		Share:      33,
 	})
@@ -413,7 +413,7 @@ func Test_RelationManagerPostgres_UpdateChannelRule(t *testing.T) {
 	}
 
 	// Add a new rule
-	err = testBu.RelationManager().UpdateChannelRule(me.Id, "new", &bursary.Rule{
+	err = testBu.RelationManager().UpdateChannelRule(me.ID, "new", &bursary.Rule{
 		Commission: 0.99,
 		Share:      99,
 	})
@@ -422,7 +422,7 @@ func Test_RelationManagerPostgres_UpdateChannelRule(t *testing.T) {
 	}
 
 	// Get new member info
-	m, err := testBu.RelationManager().GetMember(me.Id)
+	m, err := testBu.RelationManager().GetMember(me.ID)
 	if !assert.Nil(t, err) {
 		return
 	}
@@ -454,13 +454,13 @@ func Test_RelationManagerPostgres_RemoveChannelRule(t *testing.T) {
 	}
 
 	// Remove rule
-	err = testBu.RelationManager().RemoveChannelRule(me.Id, "default")
+	err = testBu.RelationManager().RemoveChannelRule(me.ID, "default")
 	if !assert.Nil(t, err) {
 		return
 	}
 
 	// Get new member info
-	m, err := testBu.RelationManager().GetMember(me.Id)
+	m, err := testBu.RelationManager().GetMember(me.ID)
 	if !assert.Nil(t, err) {
 		return
 	}
@@ -508,7 +508,7 @@ func Test_RelationManagerPostgres_RemoveChannel(t *testing.T) {
 			break
 		}
 
-		prevLevel = l.Id
+		prevLevel = l.ID
 	}
 
 	// Remvoe specific channel
@@ -521,7 +521,7 @@ func Test_RelationManagerPostgres_RemoveChannel(t *testing.T) {
 	for _, l := range levels {
 
 		// Check if member exists
-		m, err := testBu.RelationManager().GetMember(l.Id)
+		m, err := testBu.RelationManager().GetMember(l.ID)
 		if !assert.Nil(t, err) {
 			continue
 		}
