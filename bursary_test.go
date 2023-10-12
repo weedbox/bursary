@@ -165,7 +165,12 @@ func Test_CalculateRewards(t *testing.T) {
 		assert.Equal(t, a["commission"], entry.Commissions)
 		assert.Equal(t, a["gain"], entry.Gain)
 		assert.Equal(t, a["contributions"], entry.Contributions)
-		assert.Equal(t, a["gain"]+a["commission"], entry.Total)
+
+		if entry.IsPrimary {
+			assert.Equal(t, ticket.Amount-a["gain"]+a["commission"], entry.Total)
+		} else {
+			assert.Equal(t, a["gain"]+a["commission"], entry.Total)
+		}
 	}
 }
 
@@ -253,7 +258,12 @@ func Test_CalculateRewards_Aliquant(t *testing.T) {
 		a := ans[len(ans)-i-1]
 		assert.Equal(t, a["commission"], entry.Commissions)
 		assert.Equal(t, a["gain"], entry.Gain)
-		assert.Equal(t, a["gain"]+a["commission"], entry.Total)
+
+		if entry.IsPrimary {
+			assert.Equal(t, ticket.Amount-a["gain"]+a["commission"], entry.Total)
+		} else {
+			assert.Equal(t, a["gain"]+a["commission"], entry.Total)
+		}
 	}
 }
 
@@ -344,7 +354,12 @@ func Test_CalculateRewards_Negative(t *testing.T) {
 		assert.Equal(t, a["commission"], entry.Commissions)
 		assert.Equal(t, a["gain"], entry.Gain)
 		assert.Equal(t, a["contributions"], entry.Contributions)
-		assert.Equal(t, a["gain"]+a["commission"], entry.Total)
+
+		if entry.IsPrimary {
+			assert.Equal(t, ticket.Amount-a["gain"]+a["commission"], entry.Total)
+		} else {
+			assert.Equal(t, a["gain"]+a["commission"], entry.Total)
+		}
 	}
 }
 
@@ -447,7 +462,12 @@ func Test_CalculateRewards_ReturnShare(t *testing.T) {
 		a := ans[len(ans)-i-1]
 		assert.Equal(t, a["commission"], entry.Commissions)
 		assert.Equal(t, a["gain"], entry.Gain)
-		assert.Equal(t, a["gain"]+a["commission"], entry.Total)
+
+		if entry.IsPrimary {
+			assert.Equal(t, ticket.Amount-a["gain"]+a["commission"], entry.Total)
+		} else {
+			assert.Equal(t, a["gain"]+a["commission"], entry.Total)
+		}
 	}
 }
 
@@ -546,7 +566,12 @@ func Test_WriteTicket(t *testing.T) {
 		a := ans[i]
 		assert.Equal(t, a["commission"], records[0].Commissions)
 		assert.Equal(t, a["gain"], records[0].Gain)
-		assert.Equal(t, a["gain"]+a["commission"], records[0].Total)
+
+		if records[0].IsPrimary {
+			assert.Equal(t, ticket.Amount-a["gain"]+a["commission"], records[0].Total)
+		} else {
+			assert.Equal(t, a["gain"]+a["commission"], records[0].Total)
+		}
 	}
 }
 
@@ -658,7 +683,12 @@ func Test_WriteEntries(t *testing.T) {
 		a := ans[i]
 		assert.Equal(t, a["commission"], records[0].Commissions)
 		assert.Equal(t, a["gain"], records[0].Gain)
-		assert.Equal(t, a["gain"]+a["commission"], records[0].Total)
+
+		if records[0].IsPrimary {
+			assert.Equal(t, ticket.Amount-a["gain"]+a["commission"], records[0].Total)
+		} else {
+			assert.Equal(t, a["gain"]+a["commission"], records[0].Total)
+		}
 
 		// Check fields
 		assert.Equal(t, ticket.ID, records[0].PrimaryID)

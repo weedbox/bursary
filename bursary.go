@@ -152,7 +152,7 @@ func (b *bursary) CalculateRewards(t *Ticket) ([]*LedgerEntry, error) {
 	// Deduct the delivered parts
 	fee := t.Fee - le.Commissions
 
-	le.Total = le.Gain + le.Commissions
+	le.Total = le.Amount - le.Gain + le.Commissions
 
 	// Add entry of ticket owner to list
 	entries := make([]*LedgerEntry, 0)
